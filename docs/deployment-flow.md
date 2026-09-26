@@ -31,7 +31,7 @@ namespace: pawhelp-prod, crm-prod
 cluster: registered Argo CD cluster name pawhelp-prod
 ```
 
-Prod has no TeamCity, Argo CD, Grafana, or monitoring stack. The shared dev Argo CD owns the prod Application manifests and deploys them to the registered prod cluster.
+Prod has no TeamCity, Argo CD, Vault, Grafana, or monitoring stack. The shared dev Argo CD owns the prod Application manifests and deploys them to the registered prod cluster.
 
 ## CRM manager
 

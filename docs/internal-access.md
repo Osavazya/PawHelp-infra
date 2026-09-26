@@ -16,6 +16,7 @@ https://api.pawhelp.localhost
 ```text
 https://argocd.dev.pawhelp.internal
 https://grafana.dev.pawhelp.internal
+https://vault.dev.pawhelp.internal
 https://teamcity.pawhelp.internal
 ```
 
@@ -93,7 +94,7 @@ Add local host records after connecting to the dev VPN:
 10.44.0.1 argocd.dev.pawhelp.internal grafana.dev.pawhelp.internal teamcity.pawhelp.internal
 ```
 
-This keeps Argo CD, Grafana, and TeamCity off the public internet while avoiding paid AWS Client VPN for the portfolio environment.
+This keeps Argo CD, Grafana, Vault, and TeamCity off the public internet while avoiding paid AWS Client VPN for the portfolio environment.
 
 ## Node placement
 
@@ -113,4 +114,4 @@ The infra pool exists only in dev and is tainted:
 pawhelp.io/node-pool=infra:NoSchedule
 ```
 
-Dev infrastructure workloads tolerate that taint and use `nodeSelector` for the infra pool. Prod does not create an infra pool; prod platform add-ons run on the backend worker pool.
+Dev infrastructure workloads, including Argo CD, TeamCity, Vault, monitoring, cert-manager, and External Secrets, tolerate that taint and use `nodeSelector` for the infra pool. Prod does not create an infra pool; prod platform add-ons run on the backend worker pool.

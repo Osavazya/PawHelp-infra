@@ -1,6 +1,8 @@
 # Secrets
 
-Real secret values must not be committed. Runtime application secrets are read from AWS SSM Parameter Store by External Secrets Operator.
+Real secret values must not be committed.
+
+Runtime application secrets are synced into Kubernetes by External Secrets Operator. The default backend is AWS SSM Parameter Store. Dev also installs Vault and exposes a `vault` ClusterSecretStore for teams that want to move selected secrets to Vault later.
 
 ## AWS and Terraform
 
@@ -21,6 +23,8 @@ argocd.server
 argocd.username
 argocd.password
 ```
+
+`github.token` is a TeamCity secure parameter. It should be a fine-scoped token owned by a GitHub bot or technical user with push access to `PawHelp-infra`, not a personal token committed to Git.
 
 Optional if the TeamCity agent does not use an instance profile:
 
@@ -51,3 +55,19 @@ Terraform writes the PostgreSQL backup S3 parameters automatically:
 /pawhelp/<env>/postgres-backup/S3_PREFIX
 /pawhelp/<env>/postgres-backup/AWS_REGION
 ```
+
+## Vault
+
+Vault is installed only in dev on the infra worker. It is reachable through VPN as:
+
+```text
+https://vault.dev.pawhelp.internal
+```
+
+The `vault` ClusterSecretStore expects this Kubernetes secret in `platform-system`:
+
+```bash
+kubectl -n platform-system create secret generic vault-token --from-literal=token='<vault-token>'
+```
+
+Do not commit Vault root tokens or unseal keys.

@@ -36,17 +36,18 @@ crm-manager
 prometheus
 grafana
 loki
+vault
 teamcity
 argocd
 ```
 
-Prometheus, Grafana, Loki, TeamCity, and Argo CD are deployed only in dev.
+Prometheus, Grafana, Loki, Vault, TeamCity, and Argo CD are deployed only in dev.
 
 External access is only through k3s Traefik ingress and the node security group.
 
 ## Admin-only services
 
-Argo CD is installed in dev and exposed only through the internal VPN allowlist. TeamCity and Grafana follow the same model.
+Argo CD is installed in dev and exposed only through the internal VPN allowlist. TeamCity, Vault, and Grafana follow the same model.
 
 Prod does not host Argo CD or TeamCity. Register the prod cluster in dev Argo CD as `pawhelp-prod` and deploy prod from there.
 
@@ -70,6 +71,7 @@ Application ingress can stay public. Platform UIs are internal-only:
 ```text
 Argo CD
 Grafana
+Vault
 TeamCity
 ```
 

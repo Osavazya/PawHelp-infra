@@ -4,3 +4,57 @@ clusterSecretStore:
 clusterIssuer:
   name: pawhelp-selfsigned
   type: selfSigned
+
+vault:
+  enabled: true
+  injector:
+    enabled: false
+  server:
+    dev:
+      enabled: true
+    nodeSelector:
+      pawhelp.io/node-pool: infra
+    tolerations:
+      - key: pawhelp.io/node-pool
+        operator: Equal
+        value: infra
+        effect: NoSchedule
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 768Mi
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      annotations:
+        traefik.ingress.kubernetes.io/router.middlewares: platform-system-vault-vpn-only@kubernetescrd
+        cert-manager.io/cluster-issuer: pawhelp-selfsigned
+      hosts:
+        - host: vault.dev.pawhelp.internal
+          paths:
+            - /
+      tls:
+        - secretName: vault-dev-internal-tls
+          hosts:
+            - vault.dev.pawhelp.internal
+  ui:
+    enabled: true
+
+vaultSecretStore:
+  enabled: true
+  name: vault
+  server: http://vault.platform-system.svc:8200
+  path: secret
+  version: v2
+  tokenSecretRef:
+    name: vault-token
+    key: token
+    namespace: platform-system
+
+internalAccess:
+  enabled: true
+  allowedCIDRs:
+    - 10.44.0.0/24

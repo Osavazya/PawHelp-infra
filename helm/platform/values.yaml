@@ -98,3 +98,22 @@ clusterIssuer:
   enabled: true
   name: pawhelp-selfsigned
   type: selfSigned
+
+vault:
+  enabled: false
+
+vaultSecretStore:
+  enabled: false
+  name: vault
+  server: http://vault.platform-system.svc:8200
+  path: secret
+  version: v2
+  tokenSecretRef:
+    name: vault-token
+    key: token
+    namespace: platform-system
+
+internalAccess:
+  enabled: true
+  allowedCIDRs:
+    - 10.44.0.0/24

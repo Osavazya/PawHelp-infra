@@ -12,6 +12,7 @@ Backend API: https://api.dev.pawhelp.localhost
 CRM manager: https://crm.dev.pawhelp.localhost
 Argo CD: https://argocd.dev.pawhelp.internal
 Grafana: https://grafana.dev.pawhelp.internal
+Vault: https://vault.dev.pawhelp.internal
 TeamCity: https://teamcity.pawhelp.internal
 ```
 
@@ -23,7 +24,7 @@ Backend API: https://api.pawhelp.localhost
 CRM manager: https://crm.pawhelp.localhost
 ```
 
-Prod does not host Argo CD, Grafana, or TeamCity. Dev Argo CD deploys prod workloads after the prod cluster is registered as `pawhelp-prod`.
+Prod does not host Argo CD, Vault, Grafana, or TeamCity. Dev Argo CD deploys prod workloads after the prod cluster is registered as `pawhelp-prod`.
 
 ## Access model
 

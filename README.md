@@ -19,7 +19,7 @@ Production-style infrastructure for PawHelp with separate provisioning and deliv
 ```text
 pawhelp-dev / pawhelp-prod       Backend, frontend, PostgreSQL, LibreTranslate
 crm-dev / crm-prod               CRM manager workspace and Excel import storage
-monitoring-dev                   Prometheus, Grafana, Loki, Promtail
+monitoring-dev                   Prometheus, Grafana, Loki, Promtail, Vault
 teamcity                         TeamCity server and build agent
 ```
 
@@ -32,12 +32,12 @@ teamcity                         TeamCity server and build agent
 - k3s bootstrap through EC2 user data, with cluster join data stored in SSM Parameter Store.
 - Shared Argo CD app-of-apps in dev for dev and prod delivery.
 - Helm umbrella chart for PawHelp backend, frontend, PostgreSQL, and LibreTranslate.
-- Helm charts for cert-manager, External Secrets Operator, Prometheus, Grafana, Loki, Promtail, alerting rules, and dashboards.
+- Helm charts for cert-manager, External Secrets Operator, Prometheus, Grafana, Loki, Promtail, Vault, alerting rules, and dashboards.
 - Helm chart for TeamCity server and agent, deployed only from the dev Argo root.
 - Helm chart for CRM manager workspace.
 - Resource requests, limits, namespace quotas, PDB, HPA, and NetworkPolicy for application workloads.
 - TeamCity pipeline-as-code for test, image build, ECR push, GitOps image tag bump, Argo CD sync, and regression checks.
-- WireGuard VPN bootstrap and Traefik allowlist middleware for internal Argo CD, Grafana, and TeamCity access.
+- WireGuard VPN bootstrap and Traefik allowlist middleware for internal Argo CD, Grafana, Vault, and TeamCity access.
 - Optional Ansible k3s playbook for manual bootstrap or interview demo.
 
 ## Node pool placement
@@ -46,10 +46,10 @@ teamcity                         TeamCity server and build agent
 control-plane  k3s API and bootstrap only, tainted NoSchedule
 frontend       frontend web workload
 backend        API, PostgreSQL, LibreTranslate, backup CronJobs
-infra          dev only: Argo CD, cert-manager, External Secrets, monitoring, TeamCity
+infra          dev only: Argo CD, TeamCity, Vault, cert-manager, External Secrets, monitoring
 ```
 
-Prod does not deploy TeamCity, Argo CD, Grafana, or a dedicated infra worker. Prod cluster add-ons run on the backend worker pool.
+Prod does not deploy TeamCity, Argo CD, Vault, Grafana, or a dedicated infra worker. Prod cluster add-ons run on the backend worker pool.
 
 ## AWS cost model
 
@@ -80,7 +80,7 @@ helm/
 ## Bootstrap Terraform state
 
 ```powershell
-cd D:\HealthAll\PawHelp-infra\terraform\bootstrap
+cd terraform/bootstrap
 terraform init
 terraform apply -var="project=pawhelp" -var="aws_region=eu-central-1"
 ```
@@ -93,7 +93,7 @@ Copy the `state_bucket` output into:
 ## Create a Kubernetes environment
 
 ```powershell
-cd D:\HealthAll\PawHelp-infra\terraform\aws-k3s
+cd terraform/aws-k3s
 terraform init -backend-config=backend-dev.hcl
 terraform apply -var-file=env/dev.tfvars
 ```
@@ -110,7 +110,7 @@ Dev has `enable_argocd = true`. Prod has `enable_argocd = false`; prod deploymen
 ## Destroy
 
 ```powershell
-cd D:\HealthAll\PawHelp-infra\terraform\aws-k3s
+cd terraform/aws-k3s
 terraform init -reconfigure -backend-config=backend-dev.hcl
 terraform destroy -var-file=env/dev.tfvars
 terraform init -reconfigure -backend-config=backend-prod.hcl
@@ -120,11 +120,11 @@ terraform destroy -var-file=env/prod.tfvars
 ## Helm validation
 
 ```powershell
-cd D:\HealthAll\PawHelp-infra\helm\pawhelp
+cd helm/pawhelp
 helm dependency build
 helm lint . -f values-dev.yaml
 
-cd D:\HealthAll\PawHelp-infra\helm\monitoring
+cd ../monitoring
 helm dependency build
 helm lint . -f values-dev.yaml
 ```

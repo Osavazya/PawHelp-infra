@@ -1,6 +1,6 @@
 apiVersion: v2
 name: pawhelp-platform
-description: cert-manager and External Secrets Operator for PawHelp clusters
+description: cert-manager, External Secrets Operator, and Vault for PawHelp clusters
 type: application
 version: 0.1.0
 appVersion: "1.0.0"
@@ -11,3 +11,7 @@ dependencies:
   - name: external-secrets
     version: "0.10.7"
     repository: https://charts.external-secrets.io
+  - name: vault
+    version: "0.34.1"
+    repository: https://helm.releases.hashicorp.com
+    condition: vault.enabled

@@ -28,13 +28,27 @@ TeamCity builds immutable image tags from the source commit SHA and pushes:
 
 ## GitOps deploy
 
-The `deploy dev` build type updates this file:
+Dev deploy updates:
 
 ```text
 helm/pawhelp/values-dev.yaml
+branch: master
 ```
 
-It changes both image repository and image tag, commits `Bump images`, pushes to `master`, and waits for Argo CD to sync `pawhelp-dev`.
+Prod deploy updates:
+
+```text
+helm/pawhelp/values-prod.yaml
+branch: prod
+```
+
+TeamCity commits `Bump images` and pushes with the secure parameter `github.token`:
+
+```text
+https://x-access-token:%github.token%@github.com/Osavazya/PawHelp-infra.git
+```
+
+Use a GitHub bot or technical user token with minimal repository write scope. Do not use a personal token in code.
 
 ## Required TeamCity secure parameters
 
