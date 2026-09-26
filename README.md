@@ -10,6 +10,7 @@ Production-style infrastructure for PawHelp with separate provisioning and deliv
 - [Local endpoints](docs/local-endpoints.md)
 - [Secrets checklist](docs/secrets.md)
 - [Production readiness](docs/production-readiness.md)
+- [Backup and restore](docs/backup-restore.md)
 - [CI/CD flow](docs/cicd.md)
 - [Networking](docs/networking.md)
 
@@ -38,7 +39,7 @@ teamcity                         TeamCity server and build agent
 
 ## AWS cost model
 
-The default topology intentionally avoids EKS, NAT Gateway, RDS, and managed load balancers. The stack still creates 3 EC2 instances per environment because the target is a DevOps portfolio-grade Kubernetes layout. Apply it, verify, and destroy it when done.
+The default topology intentionally avoids EKS, NAT Gateway, external database services, and managed load balancers. The stack still creates 3 EC2 instances per environment because the target is a DevOps portfolio-grade Kubernetes layout. Apply it, verify, and destroy it when done.
 
 ## Directory layout
 

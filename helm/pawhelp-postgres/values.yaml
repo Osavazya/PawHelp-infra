@@ -19,3 +19,18 @@ resources:
     cpu: 500m
     memory: 512Mi
 
+
+backup:
+  enabled: true
+  schedule: "0 2 * * *"
+  retentionDays: 7
+  storageSize: 8Gi
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

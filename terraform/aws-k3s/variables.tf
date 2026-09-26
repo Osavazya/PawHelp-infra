@@ -77,7 +77,25 @@ variable "git_target_revision" {
 }
 
 variable "artifact_bucket_force_destroy" {
-  type        = bool
-  default     = false
+  type    = bool
+  default = false
 }
 
+
+variable "enable_ebs_snapshots" {
+  type        = bool
+  description = "Enable AWS DLM snapshots for Kubernetes node EBS volumes."
+  default     = true
+}
+
+variable "ebs_snapshot_interval_hours" {
+  type        = number
+  description = "EBS snapshot interval in hours."
+  default     = 24
+}
+
+variable "ebs_snapshot_retention_count" {
+  type        = number
+  description = "Number of EBS snapshots retained by DLM."
+  default     = 7
+}

@@ -62,5 +62,5 @@ For a real always-on production cluster, replace the demo network with:
 - AWS Load Balancer Controller;
 - Route 53 records;
 - ACM certificates;
-- external PostgreSQL or managed RDS;
+- in-cluster PostgreSQL with tested backups and restore runbooks;
 - S3 for backend uploads.

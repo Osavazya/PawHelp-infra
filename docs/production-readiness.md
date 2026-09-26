@@ -23,10 +23,10 @@
 ## Important limitations
 
 - Backend uploads use a `ReadWriteOnce` PVC, so backend stays at 1 replica. Move uploads to S3 before scaling backend horizontally.
-- PostgreSQL is deployed in-cluster for demo purposes. Use RDS or an external managed PostgreSQL service for real production.
+- PostgreSQL is deployed in-cluster by Helm. Keep this model for the portfolio demo; production hardening is backups, restore runbooks, resource limits, and tested upgrade flow.
 - k3s default flannel does not enforce NetworkPolicy by itself. Use Calico/Cilium if NetworkPolicy enforcement is required.
 - TeamCity image builds require a Docker-capable agent or a Kaniko/BuildKit-based build runner.
-- The demo avoids ALB/NAT/RDS to keep AWS cost low. Real production should use private subnets and managed ingress.
+- The demo avoids ALB/NAT/external database services to keep AWS cost low. Real production should use private subnets and managed ingress.
 
 ## Recommended next steps
 

@@ -269,6 +269,67 @@ resource "aws_iam_role_policy" "cluster_bootstrap" {
   })
 }
 
+
+resource "aws_iam_role" "dlm" {
+  count = var.enable_ebs_snapshots ? 1 : 0
+  name  = "${local.name}-dlm"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "dlm.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "dlm" {
+  count      = var.enable_ebs_snapshots ? 1 : 0
+  role       = aws_iam_role.dlm[0].name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSDataLifecycleManagerServiceRole"
+}
+
+resource "aws_dlm_lifecycle_policy" "node_volumes" {
+  count              = var.enable_ebs_snapshots ? 1 : 0
+  description        = "${local.name} node EBS snapshots"
+  execution_role_arn = aws_iam_role.dlm[0].arn
+  state              = "ENABLED"
+
+  policy_details {
+    resource_types = ["VOLUME"]
+
+    target_tags = {
+      Project     = var.project
+      Environment = var.environment
+      Backup      = "true"
+    }
+
+    schedule {
+      name = "daily-node-volume-snapshots"
+
+      create_rule {
+        interval      = var.ebs_snapshot_interval_hours
+        interval_unit = "HOURS"
+      }
+
+      retain_rule {
+        count = var.ebs_snapshot_retention_count
+      }
+
+      tags_to_add = {
+        Project     = var.project
+        Environment = var.environment
+        CreatedBy   = "dlm"
+      }
+
+      copy_tags = true
+    }
+  }
+}
+
 resource "aws_iam_instance_profile" "node" {
   name = "${local.name}-node"
   role = aws_iam_role.node.name
@@ -322,6 +383,17 @@ resource "aws_launch_template" "control_plane" {
       Role = "control-plane"
     }
   }
+  tag_specifications {
+    resource_type = "volume"
+
+    tags = {
+      Name        = local.control_plane_tag
+      Role        = "control-plane"
+      Project     = var.project
+      Environment = var.environment
+      Backup      = "true"
+    }
+  }
 }
 
 resource "aws_launch_template" "worker" {
@@ -365,6 +437,17 @@ resource "aws_launch_template" "worker" {
     tags = {
       Name = local.worker_tag
       Role = "worker"
+    }
+  }
+  tag_specifications {
+    resource_type = "volume"
+
+    tags = {
+      Name        = local.worker_tag
+      Role        = "worker"
+      Project     = var.project
+      Environment = var.environment
+      Backup      = "true"
     }
   }
 }
@@ -420,4 +503,6 @@ resource "aws_autoscaling_group" "worker" {
     propagate_at_launch = true
   }
 }
+
+
 

@@ -17,3 +17,8 @@ key_name          = null
 git_repo_url        = "https://github.com/Osavazya/PawHelp-infra.git"
 git_target_revision = "main"
 
+
+# Low-cost backup guardrail. Snapshot storage still has AWS cost.
+enable_ebs_snapshots         = true
+ebs_snapshot_interval_hours  = 24
+ebs_snapshot_retention_count = 7

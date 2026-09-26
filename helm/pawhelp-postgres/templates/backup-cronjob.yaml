@@ -1,0 +1,48 @@
+{{- if .Values.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-postgres-backup
+  labels:
+    app.kubernetes.io/name: pawhelp-postgres
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: {{ .Values.backup.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.backup.failedJobsHistoryLimit }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: pawhelp-postgres-backup
+            app.kubernetes.io/instance: {{ .Release.Name }}
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: pg-dump
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              envFrom:
+                - secretRef:
+                    name: {{ .Release.Name }}-postgres
+              command:
+                - /bin/sh
+                - -ec
+                - |
+                  mkdir -p /backups/${POSTGRES_DB}
+                  file="/backups/${POSTGRES_DB}/${POSTGRES_DB}-$(date -u +%Y%m%dT%H%M%SZ).dump"
+                  pg_dump -h {{ .Release.Name }}-postgres -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc -f "$file"
+                  find /backups/${POSTGRES_DB} -type f -name "*.dump" -mtime +{{ .Values.backup.retentionDays }} -delete
+                  ls -lh "$file"
+              volumeMounts:
+                - name: backups
+                  mountPath: /backups
+              resources:
+                {{- toYaml .Values.backup.resources | nindent 16 }}
+          volumes:
+            - name: backups
+              persistentVolumeClaim:
+                claimName: {{ .Release.Name }}-postgres-backups
+{{- end }}
