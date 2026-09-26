@@ -2,7 +2,7 @@
 
 ## AWS network
 
-The default AWS stack is designed for a short-lived low-cost demo:
+The AWS stack is cost-aware and keeps the topology explicit:
 
 - one VPC per environment;
 - public subnets for all k3s nodes;
@@ -51,9 +51,9 @@ Argo CD is installed in dev and exposed only through the internal VPN allowlist.
 
 Prod does not host Argo CD or TeamCity. Register the prod cluster in dev Argo CD as `pawhelp-prod` and deploy prod from there.
 
-## Production upgrade path
+## Network hardening path
 
-For a real always-on production cluster, replace the demo network with:
+For an always-on public workload, the next network layer is:
 
 - private worker subnets;
 - public ingress subnets;
@@ -61,8 +61,7 @@ For a real always-on production cluster, replace the demo network with:
 - AWS Load Balancer Controller;
 - Route 53 records;
 - ACM certificates;
-- in-cluster PostgreSQL with tested backups and restore runbooks;
-- S3 for backend uploads.
+- object storage for backend uploads.
 
 ## Internal platform access
 

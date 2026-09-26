@@ -119,7 +119,7 @@ variable "ebs_snapshot_retention_count" {
 }
 variable "backup_bucket_force_destroy" {
   type        = bool
-  description = "Allow Terraform destroy to delete the PostgreSQL backup bucket and all objects. Use only for short-lived demo environments."
+  description = "Allow Terraform destroy to delete the PostgreSQL backup bucket and all objects. Keep false for retained environments."
   default     = false
 }
 
@@ -131,7 +131,7 @@ variable "postgres_backup_retention_days" {
 
 variable "ecr_force_delete" {
   type        = bool
-  description = "Allow Terraform destroy to delete ECR repositories with images. Use only for short-lived demo environments."
+  description = "Allow Terraform destroy to delete ECR repositories with images. Keep false for retained environments."
   default     = false
 }
 

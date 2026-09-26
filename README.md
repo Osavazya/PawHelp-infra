@@ -1,6 +1,6 @@
 # PawHelp Infrastructure
 
-Production-style infrastructure for PawHelp with separate provisioning and delivery layers.
+Infrastructure code for PawHelp with separate provisioning, delivery, observability, and CI/CD layers.
 
 ## Platform documentation
 
@@ -38,7 +38,7 @@ teamcity                         TeamCity server and build agent
 - Resource requests, limits, namespace quotas, PDB, HPA, and NetworkPolicy for application workloads.
 - TeamCity pipeline-as-code for test, image build, ECR push, GitOps image tag bump, Argo CD sync, and regression checks.
 - WireGuard VPN bootstrap and Traefik allowlist middleware for internal Argo CD, Grafana, Vault, and TeamCity access.
-- Optional Ansible k3s playbook for manual bootstrap or interview demo.
+- Optional Ansible k3s playbook for manual bootstrap.
 
 ## Node pool placement
 
@@ -51,9 +51,9 @@ infra          dev only: Argo CD, TeamCity, Vault, cert-manager, External Secret
 
 Prod does not deploy TeamCity, Argo CD, Vault, Grafana, or a dedicated infra worker. Prod cluster add-ons run on the backend worker pool.
 
-## AWS cost model
+## AWS cost profile
 
-The default topology intentionally avoids EKS, NAT Gateway, external database services, and managed load balancers. Dev creates 4 EC2 instances, prod creates 3 EC2 instances. Apply it, verify, and destroy it when done.
+The topology intentionally avoids EKS, NAT Gateway, external database services, and managed load balancers. Dev creates 4 EC2 instances, prod creates 3 EC2 instances.
 
 ## Directory layout
 

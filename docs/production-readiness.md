@@ -6,13 +6,19 @@
 - `master` and `prod` branches.
 - Terraform remote state bucket bootstrap.
 - AWS VPC, subnets, routes, security group, IAM, EC2 ASG.
-- k3s with 1 control-plane and 2 workers per environment.
+- Dev k3s cluster with 1 control-plane and 3 workers: frontend, backend, infra.
+- Prod k3s cluster with 1 control-plane and 2 workers: frontend, backend.
 - Elastic IP for the control-plane entry point.
 - Argo CD app-of-apps.
 - Helm umbrella chart and service charts.
+- External Secrets Operator with AWS SSM Parameter Store.
+- Vault in dev for internal secret workflows.
+- cert-manager for in-cluster certificates.
 - Prometheus, Grafana, Loki, Promtail through Helm.
 - TeamCity server and build agent through Helm.
 - TeamCity Kotlin DSL for validate, build, deploy, regression.
+- PostgreSQL logical backup export to S3.
+- EBS snapshot policy for node volumes.
 - Resource requests and limits for application workloads.
 - PodDisruptionBudget for backend/frontend.
 - HPA for stateless frontend.
@@ -20,23 +26,22 @@
 - Secret path documentation.
 - CRM manager workload in Kubernetes.
 
-## Important limitations
+## Known constraints
 
-- Backend uploads use a `ReadWriteOnce` PVC, so backend stays at 1 replica. Move uploads to S3 before scaling backend horizontally.
-- PostgreSQL is deployed in-cluster by Helm. Keep this model for the portfolio demo; production hardening is backups, restore runbooks, resource limits, and tested upgrade flow.
-- k3s default flannel does not enforce NetworkPolicy by itself. Use Calico/Cilium if NetworkPolicy enforcement is required.
+- Backend uploads use a `ReadWriteOnce` PVC, so backend stays at 1 replica until uploads move to S3.
+- PostgreSQL is deployed in-cluster by Helm. Backups, restore flow, resource limits, and upgrade discipline are required for this model.
+- k3s default flannel does not enforce NetworkPolicy by itself. Use Calico or Cilium if NetworkPolicy enforcement is required.
 - TeamCity image builds require a Docker-capable agent or a Kaniko/BuildKit-based build runner.
-- The demo avoids ALB/NAT/external database services to keep AWS cost low. Real production should use private subnets and managed ingress.
+- The current AWS topology avoids ALB, NAT Gateway, external database services, and managed Kubernetes to keep infrastructure cost controlled.
 
 ## Recommended next steps
 
-1. Use the Terraform-managed ECR repositories and keep image tags immutable.
-2. Add External Secrets Operator and map AWS SSM paths to Kubernetes Secrets.
-3. Add cert-manager and ACM/Route 53 for real DNS.
-4. Move backend uploads to S3.
-5. Add database backups and restore runbooks.
-6. Add API regression tests and mobile smoke tests.
-7. Add Trivy image scanning to TeamCity.
-8. Add Terraform plan approval for prod.
-9. Add Argo CD RBAC and SSO.
-10. Add SLO dashboards and alert routes.
+1. Keep Terraform-managed ECR image tags immutable.
+2. Move backend uploads to S3.
+3. Add Route 53 and ACM certificates for public DNS.
+4. Add database restore automation tests.
+5. Add API regression tests and mobile smoke tests.
+6. Add Trivy image scanning enforcement to TeamCity.
+7. Add Terraform plan approval for prod.
+8. Add Argo CD RBAC and SSO.
+9. Add SLO dashboards and alert routes.
