@@ -64,3 +64,14 @@ For a real always-on production cluster, replace the demo network with:
 - ACM certificates;
 - in-cluster PostgreSQL with tested backups and restore runbooks;
 - S3 for backend uploads.
+## Internal platform access
+
+Application ingress can stay public. Platform UIs are internal-only:
+
+```text
+Argo CD
+Grafana
+TeamCity
+```
+
+Terraform installs WireGuard on the control-plane node and opens only the WireGuard UDP port. Traefik middleware allows platform ingress traffic only from the VPN CIDR. See `docs/internal-access.md`.

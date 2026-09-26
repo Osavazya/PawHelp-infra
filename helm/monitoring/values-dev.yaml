@@ -1,3 +1,8 @@
+internalAccess:
+  enabled: true
+  allowedCIDRs:
+    - 10.44.0.0/24
+
 kube-prometheus-stack:
   fullnameOverride: monitoring
   grafana:
@@ -14,8 +19,15 @@ kube-prometheus-stack:
     ingress:
       enabled: true
       ingressClassName: traefik
+      annotations:
+        traefik.ingress.kubernetes.io/router.middlewares: monitoring-dev-grafana-vpn-only@kubernetescrd
+        cert-manager.io/cluster-issuer: pawhelp-selfsigned
       hosts:
-        - grafana.dev.pawhelp.localhost
+        - grafana.dev.pawhelp.internal
+      tls:
+        - secretName: grafana-dev-internal-tls
+          hosts:
+            - grafana.dev.pawhelp.internal
   prometheus:
     prometheusSpec:
       retention: 7d

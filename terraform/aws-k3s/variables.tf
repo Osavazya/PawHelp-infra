@@ -116,3 +116,43 @@ variable "ecr_force_delete" {
   description = "Allow Terraform destroy to delete ECR repositories with images. Use only for short-lived demo environments."
   default     = false
 }
+
+variable "enable_wireguard" {
+  type        = bool
+  description = "Install WireGuard on the control-plane node for internal platform access."
+  default     = true
+}
+
+variable "wireguard_port" {
+  type        = number
+  description = "WireGuard UDP listen port."
+  default     = 51820
+}
+
+variable "wireguard_address" {
+  type        = string
+  description = "WireGuard server interface address."
+  default     = "10.44.0.1/24"
+}
+
+variable "wireguard_allowed_cidr_blocks" {
+  type        = list(string)
+  description = "Public CIDR blocks allowed to initiate WireGuard handshakes. WireGuard keys still authenticate peers."
+  default     = ["0.0.0.0/0"]
+}
+
+variable "internal_access_cidr_blocks" {
+  type        = list(string)
+  description = "CIDR blocks allowed to access internal platform ingresses through Traefik."
+  default     = ["10.44.0.0/24"]
+}
+
+variable "wireguard_peers" {
+  type = list(object({
+    name        = string
+    public_key  = string
+    allowed_ips = string
+  }))
+  description = "WireGuard peers rendered into wg0.conf. Keep public keys only in Git; private keys stay on client machines."
+  default     = []
+}

@@ -8,7 +8,18 @@ server:
   ingress:
     enabled: true
     className: traefik
-    host: teamcity.pawhelp.localhost
+    host: teamcity.pawhelp.internal
+    annotations:
+      traefik.ingress.kubernetes.io/router.middlewares: teamcity-teamcity-vpn-only@kubernetescrd
+      cert-manager.io/cluster-issuer: pawhelp-selfsigned
+    tls:
+      enabled: true
+      secretName: teamcity-internal-tls
+  internalAccess:
+    enabled: true
+    allowedCIDRs:
+      - 10.44.0.0/24
+      - 10.45.0.0/24
   persistence:
     dataSize: 20Gi
     logsSize: 5Gi
@@ -34,4 +45,3 @@ agent:
     limits:
       cpu: 2000m
       memory: 2Gi
-

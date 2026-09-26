@@ -37,3 +37,11 @@ output "backend_ecr_repository_url" {
 output "frontend_ecr_repository_url" {
   value = aws_ecr_repository.frontend.repository_url
 }
+
+output "wireguard_endpoint" {
+  value = var.enable_wireguard ? "${aws_eip.control_plane.public_ip}:${var.wireguard_port}" : null
+}
+
+output "wireguard_server_address" {
+  value = var.enable_wireguard ? var.wireguard_address : null
+}

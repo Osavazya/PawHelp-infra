@@ -365,14 +365,19 @@ resource "aws_launch_template" "control_plane" {
   }
 
   user_data = base64encode(templatefile("${path.module}/templates/control-plane.sh.tftpl", {
-    aws_region                      = var.aws_region
-    project                         = var.project
-    environment                     = var.environment
-    ssm_prefix                      = local.ssm_prefix
-    control_plane_eip_allocation_id = aws_eip.control_plane.id
-    control_plane_eip_public_ip     = aws_eip.control_plane.public_ip
-    git_repo_url                    = var.git_repo_url
-    git_target_revision             = var.git_target_revision
+    aws_region                       = var.aws_region
+    project                          = var.project
+    environment                      = var.environment
+    ssm_prefix                       = local.ssm_prefix
+    control_plane_eip_allocation_id  = aws_eip.control_plane.id
+    control_plane_eip_public_ip      = aws_eip.control_plane.public_ip
+    git_repo_url                     = var.git_repo_url
+    git_target_revision              = var.git_target_revision
+    enable_wireguard                 = var.enable_wireguard
+    wireguard_port                   = var.wireguard_port
+    wireguard_address                = var.wireguard_address
+    wireguard_peers_json             = jsonencode(var.wireguard_peers)
+    internal_access_cidr_blocks_yaml = join("\n", [for cidr in var.internal_access_cidr_blocks : "            - ${cidr}"])
   }))
 
   tag_specifications {

@@ -1,2 +1,7 @@
+internalAccess:
+  enabled: true
+  allowedCIDRs:
+    - 10.44.0.0/24
+
 nameOverride: pawhelp-monitoring
 

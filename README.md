@@ -13,6 +13,7 @@ Production-style infrastructure for PawHelp with separate provisioning and deliv
 - [Backup and restore](docs/backup-restore.md)
 - [CI/CD flow](docs/cicd.md)
 - [Networking](docs/networking.md)
+- [Internal access](docs/internal-access.md)
 
 ## Runtime services
 
@@ -25,7 +26,7 @@ teamcity                         TeamCity server and build agent
 ## What is included
 
 - Terraform bootstrap for encrypted S3 remote state.
-- Terraform AWS stack with VPC, public subnets, internet routing, security groups, IAM, Elastic IP, artifact S3 bucket, EC2 launch templates, and ASGs.
+- Terraform AWS stack with VPC, public subnets, internet routing, security groups, IAM, Elastic IP, artifact S3 bucket, PostgreSQL backup S3 bucket, ECR repositories, EC2 launch templates, and ASGs.
 - One Kubernetes cluster per environment: 1 control-plane node and 2 worker nodes.
 - k3s bootstrap through EC2 user data, with cluster join data stored in SSM Parameter Store.
 - Argo CD app-of-apps for application delivery.
@@ -33,8 +34,9 @@ teamcity                         TeamCity server and build agent
 - Helm charts for cert-manager, External Secrets Operator, Prometheus, Grafana, Loki, Promtail, alerting rules, and dashboards.
 - Helm chart for TeamCity server and agent.
 - Helm chart for CRM manager workspace.
-- Resource requests, limits, PDB, HPA, and NetworkPolicy for application workloads.
-- TeamCity pipeline-as-code for test, image build, image push, Argo CD sync, and regression checks.
+- Resource requests, limits, namespace quotas, PDB, HPA, and NetworkPolicy for application workloads.
+- TeamCity pipeline-as-code for test, image build, ECR push, GitOps image tag bump, Argo CD sync, and regression checks.
+- WireGuard VPN bootstrap and Traefik allowlist middleware for internal Argo CD, Grafana, and TeamCity access.
 - Optional Ansible k3s playbook for manual bootstrap or interview demo.
 
 ## AWS cost model

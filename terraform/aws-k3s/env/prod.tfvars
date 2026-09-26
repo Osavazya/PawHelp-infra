@@ -26,3 +26,10 @@ backup_bucket_force_destroy    = false
 postgres_backup_retention_days = 30
 ecr_force_delete               = false
 
+
+enable_wireguard              = true
+wireguard_port                = 51820
+wireguard_address             = "10.45.0.1/24"
+wireguard_allowed_cidr_blocks = ["0.0.0.0/0"]
+internal_access_cidr_blocks   = ["10.45.0.0/24"]
+wireguard_peers               = []
