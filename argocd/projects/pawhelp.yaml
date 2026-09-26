@@ -16,7 +16,11 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: monitoring-dev
       server: https://kubernetes.default.svc
+    - namespace: crm-dev
+      server: https://kubernetes.default.svc
     - namespace: monitoring-prod
+      server: https://kubernetes.default.svc
+    - namespace: crm-prod
       server: https://kubernetes.default.svc
     - namespace: teamcity
       server: https://kubernetes.default.svc

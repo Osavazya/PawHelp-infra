@@ -1,0 +1,13 @@
+replicaCount: 1
+
+ingress:
+  host: crm.pawhelp.localhost
+
+storage:
+  size: 10Gi
+
+secretPaths:
+  crmDatabaseUrl: /pawhelp/prod/crm/DATABASE_URL
+  crmJwtSecret: /pawhelp/prod/crm/JWT_SECRET
+  excelImportToken: /pawhelp/prod/crm/EXCEL_IMPORT_TOKEN
+  notificationWebhook: /pawhelp/prod/crm/NOTIFICATION_WEBHOOK_URL

@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "crm-manager.fullname" . }}
+  labels:
+    {{- include "crm-manager.labels" . | nindent 4 }}
+data:
+  CRM_IMPORT_PATH: {{ .Values.paths.imports | quote }}
+  CRM_EXPORT_PATH: {{ .Values.paths.exports | quote }}
+  CRM_REPORTS_PATH: {{ .Values.paths.reports | quote }}
+  SECRET_PATH_CRM_DATABASE_URL: {{ .Values.secretPaths.crmDatabaseUrl | quote }}
+  SECRET_PATH_CRM_JWT_SECRET: {{ .Values.secretPaths.crmJwtSecret | quote }}
+  SECRET_PATH_EXCEL_IMPORT_TOKEN: {{ .Values.secretPaths.excelImportToken | quote }}
+  SECRET_PATH_NOTIFICATION_WEBHOOK: {{ .Values.secretPaths.notificationWebhook | quote }}
+  index.html: |
+    <!doctype html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>PawHelp CRM Manager</title>
+        <style>
+          body { font-family: system-ui, sans-serif; margin: 40px; color: #1f2937; }
+          code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; }
+          section { margin-bottom: 24px; }
+        </style>
+      </head>
+      <body>
+        <h1>PawHelp CRM Manager</h1>
+        <section>
+          <p>Internal workspace for shelter operators and CRM managers.</p>
+        </section>
+        <section>
+          <h2>Local data paths</h2>
+          <p>Excel imports: <code>{{ .Values.paths.imports }}</code></p>
+          <p>Exports: <code>{{ .Values.paths.exports }}</code></p>
+          <p>Reports: <code>{{ .Values.paths.reports }}</code></p>
+        </section>
+        <section>
+          <h2>Secret paths</h2>
+          <p>Database: <code>{{ .Values.secretPaths.crmDatabaseUrl }}</code></p>
+          <p>JWT: <code>{{ .Values.secretPaths.crmJwtSecret }}</code></p>
+          <p>Excel token: <code>{{ .Values.secretPaths.excelImportToken }}</code></p>
+        </section>
+      </body>
+    </html>

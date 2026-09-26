@@ -1,0 +1,10 @@
+replicaCount: 1
+
+ingress:
+  host: crm.dev.pawhelp.localhost
+
+secretPaths:
+  crmDatabaseUrl: /pawhelp/dev/crm/DATABASE_URL
+  crmJwtSecret: /pawhelp/dev/crm/JWT_SECRET
+  excelImportToken: /pawhelp/dev/crm/EXCEL_IMPORT_TOKEN
+  notificationWebhook: /pawhelp/dev/crm/NOTIFICATION_WEBHOOK_URL

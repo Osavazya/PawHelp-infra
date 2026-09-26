@@ -15,7 +15,7 @@ kube-prometheus-stack:
       enabled: true
       ingressClassName: traefik
       hosts:
-        - grafana.dev.pawhelp.local
+        - grafana.dev.pawhelp.localhost
   prometheus:
     prometheusSpec:
       retention: 7d

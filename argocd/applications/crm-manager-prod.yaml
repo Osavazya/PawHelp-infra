@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crm-manager-prod
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "22"
+spec:
+  project: pawhelp
+  source:
+    repoURL: https://github.com/Osavazya/PawHelp-infra.git
+    targetRevision: prod
+    path: helm/crm-manager
+    helm:
+      valueFiles:
+        - values-prod.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: crm-prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -2,6 +2,22 @@
 
 Production-style infrastructure for PawHelp with separate provisioning and delivery layers.
 
+
+## Platform documentation
+
+- [Deployment flow](docs/deployment-flow.md)
+- [Secret paths](docs/secret-paths.md)
+- [Local endpoints](docs/local-endpoints.md)
+- [Secrets checklist](docs/secrets.md)
+
+## Runtime services
+
+```text
+pawhelp-dev / pawhelp-prod       Backend, frontend, PostgreSQL, LibreTranslate
+crm-dev / crm-prod               CRM manager workspace and Excel import storage
+monitoring-dev / monitoring-prod Prometheus, Grafana, Loki, Promtail
+teamcity                         TeamCity server and build agent
+```
 ## What is included
 
 - Terraform bootstrap for encrypted S3 remote state.

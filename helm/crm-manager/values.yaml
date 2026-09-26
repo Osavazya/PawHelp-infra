@@ -1,0 +1,40 @@
+replicaCount: 1
+
+image:
+  repository: nginx
+  tag: 1.27-alpine
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: traefik
+  host: crm.localhost
+  tls:
+    enabled: false
+    secretName: ""
+
+storage:
+  size: 5Gi
+
+paths:
+  imports: /data/imports
+  exports: /data/exports
+  reports: /data/reports
+
+secretPaths:
+  crmDatabaseUrl: /pawhelp/local/crm/DATABASE_URL
+  crmJwtSecret: /pawhelp/local/crm/JWT_SECRET
+  excelImportToken: /pawhelp/local/crm/EXCEL_IMPORT_TOKEN
+  notificationWebhook: /pawhelp/local/crm/NOTIFICATION_WEBHOOK_URL
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 250m
+    memory: 256Mi

@@ -1,6 +1,6 @@
 global:
   environment: prod
-  host: pawhelp.example.com
+  host: pawhelp.localhost
   imagePullPolicy: IfNotPresent
 
 pawhelp-postgres:
@@ -27,14 +27,14 @@ pawhelp-backend:
     AUTO_CREATE_TABLES: "false"
     TRANSLATOR_PROVIDER: libretranslate
     LIBRETRANSLATE_URL: http://pawhelp-libretranslate:5000
-    CORS_ORIGINS: '["https://pawhelp.example.com"]'
+    CORS_ORIGINS: '["https://pawhelp.localhost"]'
   secretEnv:
     SECRET_KEY: REPLACE_WITH_EXTERNAL_SECRET
     DATABASE_URL: postgresql://pawhelp:REPLACE_WITH_EXTERNAL_SECRET@pawhelp-postgres:5432/pawhelp
     GOOGLE_MAPS_API_KEY: ""
   ingress:
     enabled: true
-    host: api.pawhelp.example.com
+    host: api.pawhelp.localhost
 
 pawhelp-frontend:
   replicaCount: 2
@@ -43,5 +43,5 @@ pawhelp-frontend:
     tag: prod
   ingress:
     enabled: true
-    host: pawhelp.example.com
+    host: pawhelp.localhost
 

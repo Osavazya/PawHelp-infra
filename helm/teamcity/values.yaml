@@ -8,7 +8,7 @@ server:
   ingress:
     enabled: true
     className: traefik
-    host: teamcity.pawhelp.local
+    host: teamcity.pawhelp.localhost
   persistence:
     dataSize: 20Gi
     logsSize: 5Gi

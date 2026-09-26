@@ -1,6 +1,6 @@
 global:
   environment: dev
-  host: dev.pawhelp.local
+  host: dev.pawhelp.localhost
   imagePullPolicy: IfNotPresent
 
 pawhelp-postgres:
@@ -34,7 +34,7 @@ pawhelp-backend:
     GOOGLE_MAPS_API_KEY: ""
   ingress:
     enabled: true
-    host: api.dev.pawhelp.local
+    host: api.dev.pawhelp.localhost
 
 pawhelp-frontend:
   replicaCount: 1
@@ -43,5 +43,5 @@ pawhelp-frontend:
     tag: dev
   ingress:
     enabled: true
-    host: dev.pawhelp.local
+    host: dev.pawhelp.localhost
 
