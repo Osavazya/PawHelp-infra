@@ -62,3 +62,6 @@ backup:
         kind: ClusterSecretStore
         name: aws-parameter-store
       data: []
+
+nodeSelector: {}
+olerations: []

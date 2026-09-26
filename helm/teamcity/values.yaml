@@ -20,6 +20,13 @@ server:
     allowedCIDRs:
       - 10.44.0.0/24
       - 10.45.0.0/24
+  nodeSelector:
+    pawhelp.io/node-pool: infra
+  tolerations:
+    - key: pawhelp.io/node-pool
+      operator: Equal
+      value: infra
+      effect: NoSchedule
   persistence:
     dataSize: 20Gi
     logsSize: 5Gi
@@ -45,3 +52,10 @@ agent:
     limits:
       cpu: 2000m
       memory: 2Gi
+  nodeSelector:
+    pawhelp.io/node-pool: infra
+  tolerations:
+    - key: pawhelp.io/node-pool
+      operator: Equal
+      value: infra
+      effect: NoSchedule

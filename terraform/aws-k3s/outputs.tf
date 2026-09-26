@@ -14,8 +14,8 @@ output "control_plane_asg" {
   value = aws_autoscaling_group.control_plane.name
 }
 
-output "worker_asg" {
-  value = aws_autoscaling_group.worker.name
+output "worker_asgs" {
+  value = { for pool, asg in aws_autoscaling_group.worker : pool => asg.name }
 }
 
 output "ssm_session_hint" {

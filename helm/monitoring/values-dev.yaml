@@ -7,7 +7,13 @@ kube-prometheus-stack:
   fullnameOverride: monitoring
   grafana:
     enabled: true
-    adminPassword: admin
+      nodeSelector:
+        pawhelp.io/node-pool: infra
+      tolerations:
+        - key: pawhelp.io/node-pool
+          operator: Equal
+          value: infra
+          effect: NoSchedule    adminPassword: admin
     service:
       type: ClusterIP
     sidecar:
@@ -30,6 +36,13 @@ kube-prometheus-stack:
             - grafana.dev.pawhelp.internal
   prometheus:
     prometheusSpec:
+      nodeSelector:
+        pawhelp.io/node-pool: infra
+      tolerations:
+        - key: pawhelp.io/node-pool
+          operator: Equal
+          value: infra
+          effect: NoSchedule
       retention: 7d
       scrapeInterval: 30s
       serviceMonitorSelectorNilUsesHelmValues: false
@@ -44,6 +57,14 @@ kube-prometheus-stack:
           memory: 1536Mi
   alertmanager:
     enabled: true
+    alertmanagerSpec:
+      nodeSelector:
+        pawhelp.io/node-pool: infra
+      tolerations:
+        - key: pawhelp.io/node-pool
+          operator: Equal
+          value: infra
+          effect: NoSchedule
 
 loki:
   useTestSchema: true
@@ -56,6 +77,13 @@ loki:
     storage:
       type: filesystem
   singleBinary:
+    nodeSelector:
+      pawhelp.io/node-pool: infra
+    tolerations:
+      - key: pawhelp.io/node-pool
+        operator: Equal
+        value: infra
+        effect: NoSchedule
     replicas: 1
   read:
     replicas: 0
@@ -65,6 +93,11 @@ loki:
     replicas: 0
 
 promtail:
+  tolerations:
+    - key: pawhelp.io/node-pool
+      operator: Equal
+      value: infra
+      effect: NoSchedule
   config:
     clients:
       - url: http://monitoring-dev-loki:3100/loki/api/v1/push

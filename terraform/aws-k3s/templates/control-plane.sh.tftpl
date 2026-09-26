@@ -51,7 +51,7 @@ else
 fi
 %{ endif ~}
 
-curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --node-name control-plane-$(hostname) --node-label pawhelp.io/environment=${environment} --node-label node-role.kubernetes.io/control-plane=true --tls-san $PRIVATE_IP --tls-san ${control_plane_eip_public_ip} --write-kubeconfig-mode 644" sh -
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --node-name control-plane-$(hostname) --node-label pawhelp.io/environment=${environment} --node-label node-role.kubernetes.io/control-plane=true --node-taint node-role.kubernetes.io/control-plane=true:NoSchedule --tls-san $PRIVATE_IP --tls-san ${control_plane_eip_public_ip} --write-kubeconfig-mode 644" sh -
 
 until test -f /var/lib/rancher/k3s/server/node-token; do
   sleep 5
@@ -126,10 +126,10 @@ spec:
   source:
     repoURL: ${git_repo_url}
     targetRevision: ${git_target_revision}
-    path: argocd
+    path: argocd/environments/${environment}
     directory:
       recurse: true
-      include: '{projects/*.yaml,applications/*.yaml}'
+      include: '*.yaml'
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

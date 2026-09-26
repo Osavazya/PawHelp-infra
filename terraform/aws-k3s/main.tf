@@ -32,6 +32,20 @@ locals {
   ssm_prefix        = "/${var.project}/${var.environment}/k3s"
   control_plane_tag = "${local.name}-control-plane"
   worker_tag        = "${local.name}-worker"
+  worker_pools = {
+    frontend = {
+      desired_capacity = var.frontend_worker_desired_capacity
+      taints           = []
+    }
+    backend = {
+      desired_capacity = var.backend_worker_desired_capacity
+      taints           = []
+    }
+    infra = {
+      desired_capacity = var.infra_worker_desired_capacity
+      taints           = ["pawhelp.io/node-pool=infra:NoSchedule"]
+    }
+  }
 }
 
 resource "aws_s3_bucket" "artifacts" {
@@ -402,7 +416,8 @@ resource "aws_launch_template" "control_plane" {
 }
 
 resource "aws_launch_template" "worker" {
-  name_prefix   = "${local.name}-worker-"
+  for_each      = local.worker_pools
+  name_prefix   = "${local.name}-${each.key}-"
   image_id      = data.aws_ami.amazon_linux_2023.id
   instance_type = var.instance_type
   key_name      = var.key_name
@@ -434,29 +449,33 @@ resource "aws_launch_template" "worker" {
     aws_region  = var.aws_region
     ssm_prefix  = local.ssm_prefix
     environment = var.environment
+    node_pool   = each.key
+    node_taints = join(" ", [for taint in each.value.taints : "--node-taint ${taint}"])
   }))
 
   tag_specifications {
     resource_type = "instance"
 
     tags = {
-      Name = local.worker_tag
-      Role = "worker"
+      Name     = "${local.name}-${each.key}-worker"
+      Role     = "worker"
+      NodePool = each.key
     }
   }
+
   tag_specifications {
     resource_type = "volume"
 
     tags = {
-      Name        = local.worker_tag
+      Name        = "${local.name}-${each.key}-worker"
       Role        = "worker"
+      NodePool    = each.key
       Project     = var.project
       Environment = var.environment
       Backup      = "true"
     }
   }
 }
-
 resource "aws_autoscaling_group" "control_plane" {
   name                = "${local.name}-control-plane"
   min_size            = 1
@@ -484,21 +503,22 @@ resource "aws_autoscaling_group" "control_plane" {
 }
 
 resource "aws_autoscaling_group" "worker" {
-  name                = "${local.name}-worker"
-  min_size            = 2
-  max_size            = 2
-  desired_capacity    = var.worker_desired_capacity
+  for_each            = local.worker_pools
+  name                = "${local.name}-${each.key}-worker"
+  min_size            = each.value.desired_capacity
+  max_size            = each.value.desired_capacity
+  desired_capacity    = each.value.desired_capacity
   vpc_zone_identifier = values(aws_subnet.public)[*].id
   health_check_type   = "EC2"
 
   launch_template {
-    id      = aws_launch_template.worker.id
+    id      = aws_launch_template.worker[each.key].id
     version = "$Latest"
   }
 
   tag {
     key                 = "Name"
-    value               = local.worker_tag
+    value               = "${local.name}-${each.key}-worker"
     propagate_at_launch = true
   }
 
@@ -507,7 +527,10 @@ resource "aws_autoscaling_group" "worker" {
     value               = "worker"
     propagate_at_launch = true
   }
+
+  tag {
+    key                 = "NodePool"
+    value               = each.key
+    propagate_at_launch = true
+  }
 }
-
-
-

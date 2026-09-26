@@ -14,6 +14,14 @@ spec:
         app.kubernetes.io/name: teamcity-server
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      {{- with .Values.server.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: server
           image: "{{ .Values.server.image.repository }}:{{ .Values.server.image.tag }}"

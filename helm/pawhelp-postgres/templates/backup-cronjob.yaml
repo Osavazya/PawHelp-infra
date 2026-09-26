@@ -19,6 +19,14 @@ spec:
             app.kubernetes.io/name: pawhelp-postgres-backup
             app.kubernetes.io/instance: {{ .Release.Name }}
         spec:
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           restartPolicy: OnFailure
           {{- if .Values.backup.s3.enabled }}
           initContainers:

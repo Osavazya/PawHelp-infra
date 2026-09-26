@@ -23,7 +23,6 @@ Backend API: https://api.pawhelp.localhost
 CRM manager: https://crm.pawhelp.localhost
 Argo CD: https://argocd.prod.pawhelp.internal
 Grafana: https://grafana.prod.pawhelp.internal
-TeamCity: https://teamcity.pawhelp.internal
 ```
 
 ## Access model
@@ -32,4 +31,5 @@ TeamCity: https://teamcity.pawhelp.internal
 - Argo CD syncs Helm charts into Kubernetes.
 - Public application ingress is handled by the default k3s Traefik controller.
 - Internal platform ingress is protected by Traefik `ipAllowList` and WireGuard VPN CIDRs.
+- TeamCity is deployed only by the dev Argo root and is used as shared CI/CD.
 - For real production DNS, replace the `*.localhost` and `*.internal` hosts in Helm values with Route 53 records.

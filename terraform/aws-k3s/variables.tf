@@ -41,9 +41,22 @@ variable "control_plane_desired_capacity" {
   default = 1
 }
 
-variable "worker_desired_capacity" {
-  type    = number
-  default = 2
+variable "frontend_worker_desired_capacity" {
+  type        = number
+  description = "Number of frontend worker nodes."
+  default     = 1
+}
+
+variable "backend_worker_desired_capacity" {
+  type        = number
+  description = "Number of backend/data worker nodes."
+  default     = 1
+}
+
+variable "infra_worker_desired_capacity" {
+  type        = number
+  description = "Number of infrastructure worker nodes for Argo CD, monitoring, and CI/CD."
+  default     = 1
 }
 
 variable "admin_cidr_blocks" {

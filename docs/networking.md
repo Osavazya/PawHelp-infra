@@ -75,3 +75,6 @@ TeamCity
 ```
 
 Terraform installs WireGuard on the control-plane node and opens only the WireGuard UDP port. Traefik middleware allows platform ingress traffic only from the VPN CIDR. See `docs/internal-access.md`.
+## Worker node pools
+
+Terraform creates separate worker ASGs for frontend, backend, and infra. Workloads are pinned with Kubernetes `nodeSelector`; infra workloads also tolerate the infra taint. This keeps application workloads away from the control-plane and separates CI/observability/platform components from frontend/backend workloads.

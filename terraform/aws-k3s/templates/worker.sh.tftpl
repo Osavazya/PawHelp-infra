@@ -25,5 +25,4 @@ if [ -z "$SERVER_URL" ] || [ -z "$K3S_TOKEN" ] || [ "$SERVER_URL" = "None" ] || 
   exit 1
 fi
 
-curl -sfL https://get.k3s.io | K3S_URL="$SERVER_URL" K3S_TOKEN="$K3S_TOKEN" INSTALL_K3S_EXEC="agent --node-name worker-$(hostname) --node-label pawhelp.io/environment=${environment} --node-label node-role.kubernetes.io/worker=true" sh -
-
+curl -sfL https://get.k3s.io | K3S_URL="$SERVER_URL" K3S_TOKEN="$K3S_TOKEN" INSTALL_K3S_EXEC="agent --node-name ${node_pool}-worker-$(hostname) --node-label pawhelp.io/environment=${environment} --node-label node-role.kubernetes.io/worker=true --node-label pawhelp.io/node-pool=${node_pool} ${node_taints}" sh -

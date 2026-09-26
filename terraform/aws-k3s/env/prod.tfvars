@@ -5,10 +5,12 @@ aws_region  = "eu-central-1"
 vpc_cidr            = "10.43.0.0/16"
 public_subnet_cidrs = ["10.43.1.0/24", "10.43.2.0/24"]
 
-instance_type                  = "t3.micro"
-root_volume_size               = 30
-control_plane_desired_capacity = 1
-worker_desired_capacity        = 2
+instance_type                    = "t3.micro"
+root_volume_size                 = 30
+control_plane_desired_capacity   = 1
+frontend_worker_desired_capacity = 1
+backend_worker_desired_capacity  = 1
+infra_worker_desired_capacity    = 1
 
 admin_cidr_blocks = []
 enable_ssh        = false

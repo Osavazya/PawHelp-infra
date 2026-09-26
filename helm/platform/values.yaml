@@ -1,6 +1,37 @@
 cert-manager:
   installCRDs: true
   replicaCount: 1
+  nodeSelector:
+    pawhelp.io/node-pool: infra
+  tolerations:
+    - key: pawhelp.io/node-pool
+      operator: Equal
+      value: infra
+      effect: NoSchedule
+  webhook:
+    nodeSelector:
+      pawhelp.io/node-pool: infra
+    tolerations:
+      - key: pawhelp.io/node-pool
+        operator: Equal
+        value: infra
+        effect: NoSchedule
+  cainjector:
+    nodeSelector:
+      pawhelp.io/node-pool: infra
+    tolerations:
+      - key: pawhelp.io/node-pool
+        operator: Equal
+        value: infra
+        effect: NoSchedule
+  startupapicheck:
+    nodeSelector:
+      pawhelp.io/node-pool: infra
+    tolerations:
+      - key: pawhelp.io/node-pool
+        operator: Equal
+        value: infra
+        effect: NoSchedule
   resources:
     requests:
       cpu: 50m
@@ -12,6 +43,13 @@ cert-manager:
 external-secrets:
   installCRDs: true
   replicaCount: 1
+  nodeSelector:
+    pawhelp.io/node-pool: infra
+  tolerations:
+    - key: pawhelp.io/node-pool
+      operator: Equal
+      value: infra
+      effect: NoSchedule
   resources:
     requests:
       cpu: 50m
@@ -20,6 +58,13 @@ external-secrets:
       cpu: 300m
       memory: 384Mi
   webhook:
+    nodeSelector:
+      pawhelp.io/node-pool: infra
+    tolerations:
+      - key: pawhelp.io/node-pool
+        operator: Equal
+        value: infra
+        effect: NoSchedule
     resources:
       requests:
         cpu: 25m
@@ -28,6 +73,13 @@ external-secrets:
         cpu: 200m
         memory: 256Mi
   certController:
+    nodeSelector:
+      pawhelp.io/node-pool: infra
+    tolerations:
+      - key: pawhelp.io/node-pool
+        operator: Equal
+        value: infra
+        effect: NoSchedule
     resources:
       requests:
         cpu: 25m

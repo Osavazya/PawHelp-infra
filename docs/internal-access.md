@@ -97,3 +97,23 @@ Add local host records after connecting to VPN:
 ```
 
 This keeps Argo CD, Grafana, and TeamCity off the public internet while avoiding paid AWS Client VPN for the portfolio environment.
+
+## Node placement
+
+The control-plane node is tainted with `node-role.kubernetes.io/control-plane=true:NoSchedule`.
+
+Worker node pools use this label:
+
+```text
+pawhelp.io/node-pool=frontend
+pawhelp.io/node-pool=backend
+pawhelp.io/node-pool=infra
+```
+
+The infra pool is tainted:
+
+```text
+pawhelp.io/node-pool=infra:NoSchedule
+```
+
+Argo CD, Grafana, cert-manager, External Secrets, and TeamCity tolerate that taint and use `nodeSelector` for the infra pool. TeamCity is present only in the dev Argo root.

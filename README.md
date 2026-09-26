@@ -21,23 +21,34 @@ Production-style infrastructure for PawHelp with separate provisioning and deliv
 pawhelp-dev / pawhelp-prod       Backend, frontend, PostgreSQL, LibreTranslate
 crm-dev / crm-prod               CRM manager workspace and Excel import storage
 monitoring-dev / monitoring-prod Prometheus, Grafana, Loki, Promtail
-teamcity                         TeamCity server and build agent
+teamcity                         TeamCity server and build agent (dev only)
 ```
 ## What is included
 
 - Terraform bootstrap for encrypted S3 remote state.
 - Terraform AWS stack with VPC, public subnets, internet routing, security groups, IAM, Elastic IP, artifact S3 bucket, PostgreSQL backup S3 bucket, ECR repositories, EC2 launch templates, and ASGs.
-- One Kubernetes cluster per environment: 1 control-plane node and 2 worker nodes.
+- One Kubernetes cluster per environment: 1 tainted control-plane node and 3 worker node pools: frontend, backend, and infra.
 - k3s bootstrap through EC2 user data, with cluster join data stored in SSM Parameter Store.
 - Argo CD app-of-apps for application delivery.
 - Helm umbrella chart for PawHelp backend, frontend, PostgreSQL, and LibreTranslate.
 - Helm charts for cert-manager, External Secrets Operator, Prometheus, Grafana, Loki, Promtail, alerting rules, and dashboards.
-- Helm chart for TeamCity server and agent.
+- Helm chart for TeamCity server and agent, deployed only from the dev Argo root.
 - Helm chart for CRM manager workspace.
 - Resource requests, limits, namespace quotas, PDB, HPA, and NetworkPolicy for application workloads.
 - TeamCity pipeline-as-code for test, image build, ECR push, GitOps image tag bump, Argo CD sync, and regression checks.
 - WireGuard VPN bootstrap and Traefik allowlist middleware for internal Argo CD, Grafana, and TeamCity access.
 - Optional Ansible k3s playbook for manual bootstrap or interview demo.
+
+## Node pool placement
+
+```text
+control-plane  k3s API and bootstrap only, tainted NoSchedule
+frontend       frontend web workload
+backend        API, PostgreSQL, LibreTranslate, backup CronJobs
+infra          Argo CD, cert-manager, External Secrets, monitoring, TeamCity
+```
+
+TeamCity is included only in the dev Argo root. Prod does not deploy TeamCity.
 
 ## AWS cost model
 
