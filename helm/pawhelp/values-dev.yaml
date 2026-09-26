@@ -3,13 +3,62 @@ global:
   host: dev.pawhelp.localhost
   imagePullPolicy: IfNotPresent
 
+namespacePolicy:
+  limitRange:
+    enabled: true
+    default:
+      cpu: 500m
+      memory: 512Mi
+    defaultRequest:
+      cpu: 50m
+      memory: 64Mi
+  resourceQuota:
+    enabled: true
+    hard:
+      requestsCpu: "2"
+      requestsMemory: 3Gi
+      limitsCpu: "4"
+      limitsMemory: 6Gi
+      pods: "30"
+      persistentVolumeClaims: "10"
+
 pawhelp-postgres:
   auth:
     database: pawhelp
     username: pawhelp
     password: pawhelp_password
+  externalSecrets:
+    enabled: true
+    data:
+      - secretKey: POSTGRES_DB
+        remoteRef:
+          key: /pawhelp/dev/postgres/POSTGRES_DB
+      - secretKey: POSTGRES_USER
+        remoteRef:
+          key: /pawhelp/dev/postgres/POSTGRES_USER
+      - secretKey: POSTGRES_PASSWORD
+        remoteRef:
+          key: /pawhelp/dev/postgres/POSTGRES_PASSWORD
   persistence:
     size: 8Gi
+  backup:
+    retentionDays: 3
+    storageSize: 4Gi
+    schedule: "0 2 * * *"
+    s3:
+      enabled: true
+      externalSecret:
+        enabled: true
+        data:
+          - secretKey: S3_BUCKET
+            remoteRef:
+              key: /pawhelp/dev/postgres-backup/S3_BUCKET
+          - secretKey: S3_PREFIX
+            remoteRef:
+              key: /pawhelp/dev/postgres-backup/S3_PREFIX
+          - secretKey: AWS_REGION
+            remoteRef:
+              key: /pawhelp/dev/postgres-backup/AWS_REGION
 
 libretranslate:
   enabled: true
@@ -28,13 +77,26 @@ pawhelp-backend:
     TRANSLATOR_PROVIDER: libretranslate
     LIBRETRANSLATE_URL: http://pawhelp-libretranslate:5000
     CORS_ORIGINS: '["*"]'
-  secretEnv:
-    SECRET_KEY: change-me-dev
-    DATABASE_URL: postgresql://pawhelp:pawhelp_password@pawhelp-postgres:5432/pawhelp
-    GOOGLE_MAPS_API_KEY: ""
+  externalSecrets:
+    enabled: true
+    data:
+      - secretKey: SECRET_KEY
+        remoteRef:
+          key: /pawhelp/dev/backend/SECRET_KEY
+      - secretKey: DATABASE_URL
+        remoteRef:
+          key: /pawhelp/dev/backend/DATABASE_URL
+      - secretKey: GOOGLE_MAPS_API_KEY
+        remoteRef:
+          key: /pawhelp/dev/backend/GOOGLE_MAPS_API_KEY
   ingress:
     enabled: true
     host: api.dev.pawhelp.localhost
+    annotations:
+      cert-manager.io/cluster-issuer: pawhelp-selfsigned
+    tls:
+      enabled: true
+      secretName: api-dev-pawhelp-tls
 
 pawhelp-frontend:
   replicaCount: 1
@@ -44,4 +106,8 @@ pawhelp-frontend:
   ingress:
     enabled: true
     host: dev.pawhelp.localhost
-
+    annotations:
+      cert-manager.io/cluster-issuer: pawhelp-selfsigned
+    tls:
+      enabled: true
+      secretName: dev-pawhelp-tls

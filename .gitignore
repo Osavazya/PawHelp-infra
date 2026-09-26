@@ -4,3 +4,5 @@
 *.tfplan
 *.log
 .DS_Store
+helm/monitoring/charts/
+helm/platform/charts/

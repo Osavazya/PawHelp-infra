@@ -99,3 +99,20 @@ variable "ebs_snapshot_retention_count" {
   description = "Number of EBS snapshots retained by DLM."
   default     = 7
 }
+variable "backup_bucket_force_destroy" {
+  type        = bool
+  description = "Allow Terraform destroy to delete the PostgreSQL backup bucket and all objects. Use only for short-lived demo environments."
+  default     = false
+}
+
+variable "postgres_backup_retention_days" {
+  type        = number
+  description = "Number of days S3 keeps PostgreSQL logical dump backups."
+  default     = 30
+}
+
+variable "ecr_force_delete" {
+  type        = bool
+  description = "Allow Terraform destroy to delete ECR repositories with images. Use only for short-lived demo environments."
+  default     = false
+}

@@ -3,3 +3,21 @@ global:
   host: pawhelp.local
   imagePullPolicy: IfNotPresent
 
+namespacePolicy:
+  limitRange:
+    enabled: true
+    default:
+      cpu: 500m
+      memory: 512Mi
+    defaultRequest:
+      cpu: 50m
+      memory: 64Mi
+  resourceQuota:
+    enabled: true
+    hard:
+      requestsCpu: "2"
+      requestsMemory: 3Gi
+      limitsCpu: "4"
+      limitsMemory: 6Gi
+      pods: "30"
+      persistentVolumeClaims: "10"

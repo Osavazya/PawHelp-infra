@@ -1,0 +1,15 @@
+{{- if .Values.namespacePolicy.limitRange.enabled }}
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: {{ .Release.Name }}-limits
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: {{ .Values.namespacePolicy.limitRange.default.cpu | quote }}
+        memory: {{ .Values.namespacePolicy.limitRange.default.memory | quote }}
+      defaultRequest:
+        cpu: {{ .Values.namespacePolicy.limitRange.defaultRequest.cpu | quote }}
+        memory: {{ .Values.namespacePolicy.limitRange.defaultRequest.memory | quote }}
+{{- end }}

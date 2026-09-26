@@ -9,8 +9,8 @@ spec:
   project: pawhelp
   source:
     repoURL: https://github.com/Osavazya/PawHelp-infra.git
-    targetRevision: main
-    path: infra/helm/monitoring
+    targetRevision: prod
+    path: helm/monitoring
     helm:
       valueFiles:
         - values-prod.yaml

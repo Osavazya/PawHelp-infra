@@ -30,7 +30,7 @@
 
 ## Recommended next steps
 
-1. Add ECR repositories or keep GHCR public/private with image pull secrets.
+1. Use the Terraform-managed ECR repositories and keep image tags immutable.
 2. Add External Secrets Operator and map AWS SSM paths to Kubernetes Secrets.
 3. Add cert-manager and ACM/Route 53 for real DNS.
 4. Move backend uploads to S3.

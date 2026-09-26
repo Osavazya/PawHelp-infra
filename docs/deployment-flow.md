@@ -1,8 +1,8 @@
 # Deployment flow
 
 ```text
-Backend repo   -> TeamCity -> ghcr.io/osavazya/pawhelp-backend:<sha>
-Frontend repo  -> TeamCity -> ghcr.io/osavazya/pawhelp-frontend:<sha>
+Backend repo   -> TeamCity -> ECR pawhelp-backend:<sha>
+Frontend repo  -> TeamCity -> ECR pawhelp-frontend:<sha>
 Infra repo     -> Argo CD  -> Helm release in Kubernetes
 ```
 

@@ -13,6 +13,7 @@ ingress:
   enabled: false
   className: traefik
   host: pawhelp.local
+  annotations: {}
   tls:
     enabled: false
     secretName: ""
@@ -24,7 +25,6 @@ resources:
   limits:
     cpu: 250m
     memory: 128Mi
-
 
 podSecurityContext:
   seccompProfile:

@@ -1,0 +1,15 @@
+dependencies:
+- name: pawhelp-backend
+  repository: file://../pawhelp-backend
+  version: 0.1.0
+- name: pawhelp-frontend
+  repository: file://../pawhelp-frontend
+  version: 0.1.0
+- name: pawhelp-postgres
+  repository: file://../pawhelp-postgres
+  version: 0.1.0
+- name: libretranslate
+  repository: file://../libretranslate
+  version: 0.1.0
+digest: sha256:d3dd49af2baa95f03b457c7cf8c4d3a5caf23847ae5a84eb10c23a7e002c97d2
+generated: "2026-09-26T17:09:15.6607045+02:00"

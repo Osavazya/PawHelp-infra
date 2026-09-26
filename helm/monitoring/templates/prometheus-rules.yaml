@@ -16,6 +16,14 @@ spec:
           annotations:
             summary: PawHelp backend target is missing
             description: Prometheus has not seen a healthy PawHelp backend target for 5 minutes.
+        - alert: PawHelpPostgresDown
+          expr: absent(kube_statefulset_status_replicas_ready{namespace=~"pawhelp-.*", statefulset=~".*postgres"} == 1)
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: PawHelp PostgreSQL is not ready
+            description: PostgreSQL StatefulSet has no ready replica for 5 minutes.
         - alert: PawHelpPodCrashLooping
           expr: increase(kube_pod_container_status_restarts_total{namespace=~"pawhelp-.*"}[10m]) > 3
           for: 5m
@@ -24,6 +32,26 @@ spec:
           annotations:
             summary: PawHelp pod is restarting repeatedly
             description: A PawHelp container restarted more than 3 times in 10 minutes.
+        - alert: PawHelpPodOOMKilled
+          expr: increase(kube_pod_container_status_restarts_total{namespace=~"pawhelp-.*"}[10m]) > 0 and on(namespace,pod,container) kube_pod_container_status_last_terminated_reason{namespace=~"pawhelp-.*", reason="OOMKilled"} == 1
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: PawHelp pod was OOMKilled
+            description: A PawHelp container restarted because it exceeded its memory limit.
+        - alert: PawHelpHighCPUUsage
+          expr: |
+            sum(rate(container_cpu_usage_seconds_total{namespace=~"pawhelp-.*", container!="", image!=""}[5m])) by (pod)
+            /
+            sum(kube_pod_container_resource_limits{namespace=~"pawhelp-.*", resource="cpu"}) by (pod)
+            > 0.85
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: PawHelp pod CPU usage is high
+            description: A PawHelp pod is using more than 85 percent of its CPU limit.
         - alert: PawHelpHighMemoryUsage
           expr: |
             sum(container_memory_working_set_bytes{namespace=~"pawhelp-.*", container!="", image!=""}) by (pod)
@@ -36,4 +64,31 @@ spec:
           annotations:
             summary: PawHelp pod memory usage is high
             description: A PawHelp pod is using more than 85 percent of its memory limit.
-
+        - alert: PawHelpPVCAlmostFull
+          expr: |
+            kubelet_volume_stats_used_bytes{namespace=~"pawhelp-.*"}
+            /
+            kubelet_volume_stats_capacity_bytes{namespace=~"pawhelp-.*"}
+            > 0.85
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: PawHelp PVC usage is high
+            description: A PawHelp persistent volume claim is more than 85 percent full.
+        - alert: PawHelpPostgresBackupFailed
+          expr: kube_job_status_failed{namespace=~"pawhelp-.*", job_name=~".*postgres-backup.*"} > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: PawHelp PostgreSQL backup failed
+            description: The PostgreSQL backup CronJob has a failed Job.
+        - alert: PawHelpPostgresBackupMissing
+          expr: time() - max(kube_job_status_start_time{namespace=~"pawhelp-.*", job_name=~".*postgres-backup.*"}) by (namespace) > 93600
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: PawHelp PostgreSQL backup has not run recently
+            description: No PostgreSQL backup job has started in the last 26 hours.

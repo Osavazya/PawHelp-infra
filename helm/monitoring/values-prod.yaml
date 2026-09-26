@@ -34,8 +34,10 @@ kube-prometheus-stack:
     enabled: true
 
 loki:
+  useTestSchema: true
   deploymentMode: SingleBinary
   loki:
+    useTestSchema: true
     auth_enabled: false
     commonConfig:
       replication_factor: 1

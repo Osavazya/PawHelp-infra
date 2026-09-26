@@ -20,7 +20,59 @@ spec:
             app.kubernetes.io/instance: {{ .Release.Name }}
         spec:
           restartPolicy: OnFailure
+          {{- if .Values.backup.s3.enabled }}
+          initContainers:
+            - name: pg-dump
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              envFrom:
+                - secretRef:
+                    name: {{ .Release.Name }}-postgres
+              command:
+                - /bin/sh
+                - -ec
+                - |
+                  stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+                  mkdir -p /backups/${POSTGRES_DB} /work
+                  file="/backups/${POSTGRES_DB}/${POSTGRES_DB}-${stamp}.dump"
+                  pg_dump -h {{ .Release.Name }}-postgres -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc -f "$file"
+                  cp "$file" /work/latest.dump
+                  echo "${POSTGRES_DB}-${stamp}.dump" > /work/object-name
+                  find /backups/${POSTGRES_DB} -type f -name "*.dump" -mtime +{{ .Values.backup.retentionDays }} -delete
+                  ls -lh "$file"
+              volumeMounts:
+                - name: backups
+                  mountPath: /backups
+                - name: work
+                  mountPath: /work
+              resources:
+                {{- toYaml .Values.backup.resources | nindent 16 }}
+          {{- end }}
           containers:
+            {{- if .Values.backup.s3.enabled }}
+            - name: s3-export
+              image: "{{ .Values.backup.s3.awsCliImage.repository }}:{{ .Values.backup.s3.awsCliImage.tag }}"
+              imagePullPolicy: {{ .Values.backup.s3.awsCliImage.pullPolicy }}
+              envFrom:
+                - secretRef:
+                    name: {{ .Release.Name }}-postgres
+                - secretRef:
+                    name: {{ .Values.backup.s3.secretName | default (printf "%s-postgres-backup-s3" .Release.Name) }}
+              command:
+                - /bin/sh
+                - -ec
+                - |
+                  object="$(cat /work/object-name)"
+                  test -n "$S3_BUCKET"
+                  test -n "$S3_PREFIX"
+                  aws s3 cp /work/latest.dump "s3://${S3_BUCKET}/${S3_PREFIX}/${object}"
+                  aws s3 ls "s3://${S3_BUCKET}/${S3_PREFIX}/${object}"
+              volumeMounts:
+                - name: work
+                  mountPath: /work
+              resources:
+                {{- toYaml .Values.backup.s3.resources | nindent 16 }}
+            {{- else }}
             - name: pg-dump
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -41,8 +93,13 @@ spec:
                   mountPath: /backups
               resources:
                 {{- toYaml .Values.backup.resources | nindent 16 }}
+            {{- end }}
           volumes:
             - name: backups
               persistentVolumeClaim:
                 claimName: {{ .Release.Name }}-postgres-backups
+            {{- if .Values.backup.s3.enabled }}
+            - name: work
+              emptyDir: {}
+            {{- end }}
 {{- end }}

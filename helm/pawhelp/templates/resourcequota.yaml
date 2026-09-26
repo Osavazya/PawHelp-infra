@@ -1,0 +1,14 @@
+{{- if .Values.namespacePolicy.resourceQuota.enabled }}
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: {{ .Release.Name }}-quota
+spec:
+  hard:
+    requests.cpu: {{ .Values.namespacePolicy.resourceQuota.hard.requestsCpu | quote }}
+    requests.memory: {{ .Values.namespacePolicy.resourceQuota.hard.requestsMemory | quote }}
+    limits.cpu: {{ .Values.namespacePolicy.resourceQuota.hard.limitsCpu | quote }}
+    limits.memory: {{ .Values.namespacePolicy.resourceQuota.hard.limitsMemory | quote }}
+    pods: {{ .Values.namespacePolicy.resourceQuota.hard.pods | quote }}
+    persistentvolumeclaims: {{ .Values.namespacePolicy.resourceQuota.hard.persistentVolumeClaims | quote }}
+{{- end }}

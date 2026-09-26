@@ -1,0 +1,6 @@
+clusterSecretStore:
+  region: eu-central-1
+
+clusterIssuer:
+  name: pawhelp-selfsigned
+  type: selfSigned

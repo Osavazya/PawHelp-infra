@@ -3,20 +3,69 @@ global:
   host: pawhelp.localhost
   imagePullPolicy: IfNotPresent
 
+namespacePolicy:
+  limitRange:
+    enabled: true
+    default:
+      cpu: 500m
+      memory: 512Mi
+    defaultRequest:
+      cpu: 50m
+      memory: 64Mi
+  resourceQuota:
+    enabled: true
+    hard:
+      requestsCpu: "3"
+      requestsMemory: 5Gi
+      limitsCpu: "6"
+      limitsMemory: 10Gi
+      pods: "40"
+      persistentVolumeClaims: "12"
+
 pawhelp-postgres:
   auth:
     database: pawhelp
     username: pawhelp
     password: REPLACE_WITH_EXTERNAL_SECRET
+  externalSecrets:
+    enabled: true
+    data:
+      - secretKey: POSTGRES_DB
+        remoteRef:
+          key: /pawhelp/prod/postgres/POSTGRES_DB
+      - secretKey: POSTGRES_USER
+        remoteRef:
+          key: /pawhelp/prod/postgres/POSTGRES_USER
+      - secretKey: POSTGRES_PASSWORD
+        remoteRef:
+          key: /pawhelp/prod/postgres/POSTGRES_PASSWORD
   persistence:
     size: 20Gi
+  backup:
+    retentionDays: 14
+    storageSize: 20Gi
+    schedule: "0 2 * * *"
+    s3:
+      enabled: true
+      externalSecret:
+        enabled: true
+        data:
+          - secretKey: S3_BUCKET
+            remoteRef:
+              key: /pawhelp/prod/postgres-backup/S3_BUCKET
+          - secretKey: S3_PREFIX
+            remoteRef:
+              key: /pawhelp/prod/postgres-backup/S3_PREFIX
+          - secretKey: AWS_REGION
+            remoteRef:
+              key: /pawhelp/prod/postgres-backup/AWS_REGION
 
 libretranslate:
   enabled: true
   languages: en,es,uk
 
 pawhelp-backend:
-  replicaCount: 2
+  replicaCount: 1
   image:
     repository: ghcr.io/osavazya/pawhelp-backend
     tag: prod
@@ -28,13 +77,26 @@ pawhelp-backend:
     TRANSLATOR_PROVIDER: libretranslate
     LIBRETRANSLATE_URL: http://pawhelp-libretranslate:5000
     CORS_ORIGINS: '["https://pawhelp.localhost"]'
-  secretEnv:
-    SECRET_KEY: REPLACE_WITH_EXTERNAL_SECRET
-    DATABASE_URL: postgresql://pawhelp:REPLACE_WITH_EXTERNAL_SECRET@pawhelp-postgres:5432/pawhelp
-    GOOGLE_MAPS_API_KEY: ""
+  externalSecrets:
+    enabled: true
+    data:
+      - secretKey: SECRET_KEY
+        remoteRef:
+          key: /pawhelp/prod/backend/SECRET_KEY
+      - secretKey: DATABASE_URL
+        remoteRef:
+          key: /pawhelp/prod/backend/DATABASE_URL
+      - secretKey: GOOGLE_MAPS_API_KEY
+        remoteRef:
+          key: /pawhelp/prod/backend/GOOGLE_MAPS_API_KEY
   ingress:
     enabled: true
     host: api.pawhelp.localhost
+    annotations:
+      cert-manager.io/cluster-issuer: pawhelp-selfsigned
+    tls:
+      enabled: true
+      secretName: api-prod-pawhelp-tls
 
 pawhelp-frontend:
   replicaCount: 2
@@ -44,4 +106,8 @@ pawhelp-frontend:
   ingress:
     enabled: true
     host: pawhelp.localhost
-
+    annotations:
+      cert-manager.io/cluster-issuer: pawhelp-selfsigned
+    tls:
+      enabled: true
+      secretName: prod-pawhelp-tls

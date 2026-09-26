@@ -1,33 +1,53 @@
 # Secrets
 
-Create these as GitHub repository or organization secrets. Do not commit real values.
+Real secret values must not be committed. Runtime application secrets are read from AWS SSM Parameter Store by External Secrets Operator.
 
-## AWS
+## AWS and Terraform
 
-- AWS_ACCESS_KEY_ID
-- AWS_SECRET_ACCESS_KEY
-- AWS_REGION
-- TF_STATE_BUCKET
+```text
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+AWS_REGION
+TF_STATE_BUCKET
+```
 
-## Container registry
+## TeamCity secure parameters
 
-- GHCR_USERNAME
-- GHCR_TOKEN
+```text
+aws.account.id
+aws.region
+github.token
+argocd.server
+argocd.username
+argocd.password
+```
 
-## Backend runtime
+Optional if the TeamCity agent does not use an instance profile:
 
-- SECRET_KEY
-- DATABASE_URL
-- POSTGRES_PASSWORD
-- GOOGLE_MAPS_API_KEY
-- LIBRETRANSLATE_API_KEY
+```text
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+```
 
-## TeamCity
+## Runtime SSM values
 
-- TEAMCITY_ADMIN_PASSWORD
-- TEAMCITY_GHCR_TOKEN
+Seed these before Argo syncs the application:
 
-## Argo CD
+```bash
+aws ssm put-parameter --name /pawhelp/dev/postgres/POSTGRES_DB --type String --value pawhelp --overwrite
+aws ssm put-parameter --name /pawhelp/dev/postgres/POSTGRES_USER --type String --value pawhelp --overwrite
+aws ssm put-parameter --name /pawhelp/dev/postgres/POSTGRES_PASSWORD --type SecureString --value '<dev-password>' --overwrite
+aws ssm put-parameter --name /pawhelp/dev/backend/SECRET_KEY --type SecureString --value '<dev-secret>' --overwrite
+aws ssm put-parameter --name /pawhelp/dev/backend/DATABASE_URL --type SecureString --value 'postgresql://pawhelp:<dev-password>@pawhelp-postgres:5432/pawhelp' --overwrite
+aws ssm put-parameter --name /pawhelp/dev/backend/GOOGLE_MAPS_API_KEY --type SecureString --value '<key-or-empty>' --overwrite
+```
 
-- ARGOCD_ADMIN_PASSWORD
-- ARGOCD_REPO_TOKEN
+Repeat the same paths under `/pawhelp/prod/...` for production.
+
+Terraform writes the PostgreSQL backup S3 parameters automatically:
+
+```text
+/pawhelp/<env>/postgres-backup/S3_BUCKET
+/pawhelp/<env>/postgres-backup/S3_PREFIX
+/pawhelp/<env>/postgres-backup/AWS_REGION
+```

@@ -25,3 +25,15 @@ output "ssm_session_hint" {
 output "control_plane_eip" {
   value = aws_eip.control_plane.public_ip
 }
+
+output "postgres_backup_bucket" {
+  value = aws_s3_bucket.postgres_backups.bucket
+}
+
+output "backend_ecr_repository_url" {
+  value = aws_ecr_repository.backend.repository_url
+}
+
+output "frontend_ecr_repository_url" {
+  value = aws_ecr_repository.frontend.repository_url
+}

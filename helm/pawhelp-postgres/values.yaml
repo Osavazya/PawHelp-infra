@@ -8,6 +8,14 @@ auth:
   username: pawhelp
   password: pawhelp_password
 
+externalSecrets:
+  enabled: false
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: aws-parameter-store
+  data: []
+
 persistence:
   size: 8Gi
 
@@ -18,7 +26,6 @@ resources:
   limits:
     cpu: 500m
     memory: 512Mi
-
 
 backup:
   enabled: true
@@ -34,3 +41,24 @@ backup:
     limits:
       cpu: 500m
       memory: 512Mi
+  s3:
+    enabled: false
+    secretName: ""
+    awsCliImage:
+      repository: public.ecr.aws/aws-cli/aws-cli
+      tag: "2.15.40"
+      pullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: 25m
+        memory: 64Mi
+      limits:
+        cpu: 300m
+        memory: 256Mi
+    externalSecret:
+      enabled: false
+      refreshInterval: 1h
+      secretStoreRef:
+        kind: ClusterSecretStore
+        name: aws-parameter-store
+      data: []

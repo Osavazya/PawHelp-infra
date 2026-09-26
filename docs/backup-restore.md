@@ -1,92 +1,58 @@
 # Backup and restore
 
-PawHelp keeps PostgreSQL in Kubernetes as code. The database is deployed by the `pawhelp-postgres` Helm chart.
+PostgreSQL runs inside Kubernetes. Backups have two layers:
 
-## Backup layers
+1. Logical dumps with `pg_dump -Fc` from the `pawhelp-postgres-backup` CronJob.
+2. AWS EBS snapshots for Kubernetes node volumes through Terraform DLM policy.
 
-### 1. PostgreSQL logical backup
+## S3 export
 
-The chart creates a Kubernetes `CronJob`:
-
-```text
-<release>-postgres-backup
-```
-
-Default schedule:
+Terraform creates one S3 bucket per environment:
 
 ```text
-0 2 * * *
+pawhelp-<env>-postgres-backups-<aws-account-id>-<aws-region>
 ```
 
-Backup files are written as custom-format dumps:
+Terraform also writes these SSM parameters:
 
 ```text
-/backups/<database>/<database>-YYYYMMDDTHHMMSSZ.dump
+/pawhelp/dev/postgres-backup/S3_BUCKET
+/pawhelp/dev/postgres-backup/S3_PREFIX
+/pawhelp/dev/postgres-backup/AWS_REGION
+
+/pawhelp/prod/postgres-backup/S3_BUCKET
+/pawhelp/prod/postgres-backup/S3_PREFIX
+/pawhelp/prod/postgres-backup/AWS_REGION
 ```
 
-The backup PVC is:
+External Secrets Operator syncs those values into the Kubernetes secret used by the backup CronJob. The CronJob writes dumps to:
 
 ```text
-<release>-postgres-backups
+PVC path: /backups/<database>/*.dump
+S3 path: s3://<bucket>/<prefix>/<database>-<timestamp>.dump
 ```
-
-Retention:
-
-```text
-dev: 3 days
-prod: 14 days
-```
-
-### 2. EBS snapshots
-
-Terraform creates an AWS DLM lifecycle policy for EC2 node EBS volumes tagged with:
-
-```text
-Project=pawhelp
-Environment=<dev|prod>
-Backup=true
-```
-
-Defaults:
-
-```text
-dev: every 24h, keep 3 snapshots
-prod: every 24h, keep 7 snapshots
-```
-
-This protects node disks. PostgreSQL logical dumps are still the primary database recovery path.
 
 ## Manual backup
 
-```powershell
+```bash
 kubectl -n pawhelp-dev create job --from=cronjob/pawhelp-postgres-backup manual-postgres-backup
-kubectl -n pawhelp-dev logs job/manual-postgres-backup
+kubectl -n pawhelp-dev logs job/manual-postgres-backup -f
 ```
 
-## Restore flow
-
-1. Scale backend down so writes stop.
-2. Copy the selected dump into a temporary pod with PostgreSQL client.
-3. Restore with `pg_restore`.
-4. Restart backend.
-
-Example:
+## Restore from S3
 
 ```bash
-pg_restore -h pawhelp-postgres -U pawhelp -d pawhelp --clean --if-exists /backups/pawhelp/pawhelp-YYYYMMDDTHHMMSSZ.dump
+aws s3 cp s3://<bucket>/<prefix>/<dump-file>.dump ./restore.dump
+kubectl -n pawhelp-dev cp ./restore.dump pawhelp-postgres-0:/tmp/restore.dump
+kubectl -n pawhelp-dev exec -it pawhelp-postgres-0 -- pg_restore -U pawhelp -d pawhelp --clean --if-exists /tmp/restore.dump
 ```
 
-## Paths
+## Terraform paths
 
 ```text
-PostgreSQL data: /var/lib/postgresql/data/pgdata
-PostgreSQL backups: /backups/<database>/*.dump
-Terraform DLM policy: terraform/aws-k3s/main.tf
-Helm backup CronJob: helm/pawhelp-postgres/templates/backup-cronjob.yaml
+terraform/aws-k3s/backups.tf       S3 bucket, lifecycle, SSM paths, IAM access
+terraform/aws-k3s/main.tf          EBS volume tags and DLM snapshots
+helm/pawhelp-postgres/templates/   backup CronJob, PVC, S3 ExternalSecret
 ```
 
-## Notes
-
-- Backup PVC lives in Kubernetes and is suitable for demo and short-lived environments.
-- For longer-lived production, sync dumps to S3 with a dedicated backup image or external backup controller.
-- Do not rely only on EBS snapshots for PostgreSQL restore. Use logical dumps for application-level recovery.
+EBS snapshots are useful for node-level recovery, but application recovery should use the logical PostgreSQL dump first.

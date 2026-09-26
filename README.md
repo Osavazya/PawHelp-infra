@@ -30,7 +30,7 @@ teamcity                         TeamCity server and build agent
 - k3s bootstrap through EC2 user data, with cluster join data stored in SSM Parameter Store.
 - Argo CD app-of-apps for application delivery.
 - Helm umbrella chart for PawHelp backend, frontend, PostgreSQL, and LibreTranslate.
-- Helm charts for Prometheus, Grafana, Loki, Promtail, alerting rules, and dashboards.
+- Helm charts for cert-manager, External Secrets Operator, Prometheus, Grafana, Loki, Promtail, alerting rules, and dashboards.
 - Helm chart for TeamCity server and agent.
 - Helm chart for CRM manager workspace.
 - Resource requests, limits, PDB, HPA, and NetworkPolicy for application workloads.
@@ -44,42 +44,42 @@ The default topology intentionally avoids EKS, NAT Gateway, external database se
 ## Directory layout
 
 ```text
-infra/
-  terraform/
+terraform/
     bootstrap/
     aws-k3s/
-  ansible/
+ansible/
     k3s/
-  argocd/
+argocd/
     projects/
     applications/
-  helm/
+helm/
     pawhelp/
     pawhelp-backend/
     pawhelp-frontend/
     pawhelp-postgres/
     libretranslate/
     monitoring/
+    platform/
     teamcity/
 ```
 
 ## Bootstrap Terraform state
 
 ```powershell
-cd D:\PawHelp\infra\terraform\bootstrap
+cd D:\HealthAll\PawHelp-infra\terraform\bootstrap
 terraform init
 terraform apply -var="project=pawhelp" -var="aws_region=eu-central-1"
 ```
 
 Copy the `state_bucket` output into:
 
-- `infra/terraform/aws-k3s/backend-dev.hcl`
-- `infra/terraform/aws-k3s/backend-prod.hcl`
+- `terraform/aws-k3s/backend-dev.hcl`
+- `terraform/aws-k3s/backend-prod.hcl`
 
 ## Create a Kubernetes environment
 
 ```powershell
-cd D:\PawHelp\infra\terraform\aws-k3s
+cd D:\HealthAll\PawHelp-infra\terraform\aws-k3s
 terraform init -backend-config=backend-dev.hcl
 terraform apply -var-file=env/dev.tfvars
 ```
@@ -96,7 +96,7 @@ Set `git_repo_url` in the tfvars file before apply if Argo CD should bootstrap i
 ## Destroy
 
 ```powershell
-cd D:\PawHelp\infra\terraform\aws-k3s
+cd D:\HealthAll\PawHelp-infra\terraform\aws-k3s
 terraform init -reconfigure -backend-config=backend-dev.hcl
 terraform destroy -var-file=env/dev.tfvars
 terraform init -reconfigure -backend-config=backend-prod.hcl
@@ -106,15 +106,15 @@ terraform destroy -var-file=env/prod.tfvars
 ## Helm validation
 
 ```powershell
-cd D:\PawHelp\infra\helm\pawhelp
+cd D:\HealthAll\PawHelp-infra\helm\pawhelp
 helm dependency build
 helm lint . -f values-dev.yaml
 
-cd D:\PawHelp\infra\helm\monitoring
+cd D:\HealthAll\PawHelp-infra\helm\monitoring
 helm dependency build
 helm lint . -f values-dev.yaml
 ```
 
 ## Argo CD
 
-Replace `https://github.com/Osavazya/PawHelp-infra.git` in `infra/argocd/applications/*.yaml` with the real repo URL.
+Replace `https://github.com/Osavazya/PawHelp-infra.git` in `argocd/applications/*.yaml` with the real repo URL.

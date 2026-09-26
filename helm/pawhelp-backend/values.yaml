@@ -17,6 +17,7 @@ ingress:
   enabled: false
   className: traefik
   host: api.pawhelp.local
+  annotations: {}
   tls:
     enabled: false
     secretName: ""
@@ -33,6 +34,14 @@ secretEnv:
   SECRET_KEY: change-me
   DATABASE_URL: postgresql://pawhelp:pawhelp_password@pawhelp-postgres:5432/pawhelp
   GOOGLE_MAPS_API_KEY: ""
+
+externalSecrets:
+  enabled: false
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: aws-parameter-store
+  data: []
 
 uploads:
   size: 5Gi
