@@ -57,6 +57,14 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "artifacts" {
   }
 }
 
+resource "aws_eip" "control_plane" {
+  domain = "vpc"
+
+  tags = {
+    Name = "${local.name}-control-plane"
+  }
+}
+
 resource "aws_vpc" "this" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
@@ -247,6 +255,15 @@ resource "aws_iam_role_policy" "cluster_bootstrap" {
           aws_s3_bucket.artifacts.arn,
           "${aws_s3_bucket.artifacts.arn}/*"
         ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:AssociateAddress",
+          "ec2:DescribeAddresses",
+          "ec2:DescribeInstances"
+        ]
+        Resource = "*"
       }
     ]
   })
@@ -287,12 +304,14 @@ resource "aws_launch_template" "control_plane" {
   }
 
   user_data = base64encode(templatefile("${path.module}/templates/control-plane.sh.tftpl", {
-    aws_region          = var.aws_region
-    project             = var.project
-    environment         = var.environment
-    ssm_prefix          = local.ssm_prefix
-    git_repo_url        = var.git_repo_url
-    git_target_revision = var.git_target_revision
+    aws_region                      = var.aws_region
+    project                         = var.project
+    environment                     = var.environment
+    ssm_prefix                      = local.ssm_prefix
+    control_plane_eip_allocation_id = aws_eip.control_plane.id
+    control_plane_eip_public_ip     = aws_eip.control_plane.public_ip
+    git_repo_url                    = var.git_repo_url
+    git_target_revision             = var.git_target_revision
   }))
 
   tag_specifications {

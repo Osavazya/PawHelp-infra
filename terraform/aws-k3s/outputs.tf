@@ -22,3 +22,6 @@ output "ssm_session_hint" {
   value = "aws ssm start-session --target <instance-id> --region ${var.aws_region}"
 }
 
+output "control_plane_eip" {
+  value = aws_eip.control_plane.public_ip
+}

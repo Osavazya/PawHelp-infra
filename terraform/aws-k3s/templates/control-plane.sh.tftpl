@@ -8,8 +8,13 @@ dnf install -y awscli git jq tar gzip
 
 TOKEN="$(curl -X PUT -H 'X-aws-ec2-metadata-token-ttl-seconds: 21600' -s http://169.254.169.254/latest/api/token)"
 PRIVATE_IP="$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/local-ipv4)"
+INSTANCE_ID="$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)"
 
-curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --node-name control-plane-$(hostname) --node-label pawhelp.io/environment=${environment} --node-label node-role.kubernetes.io/control-plane=true --tls-san $PRIVATE_IP --write-kubeconfig-mode 644" sh -
+if [ -n "${control_plane_eip_allocation_id}" ]; then
+  aws ec2 associate-address --region ${aws_region} --instance-id "$INSTANCE_ID" --allocation-id "${control_plane_eip_allocation_id}" --allow-reassociation || true
+fi
+
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --node-name control-plane-$(hostname) --node-label pawhelp.io/environment=${environment} --node-label node-role.kubernetes.io/control-plane=true --tls-san $PRIVATE_IP --tls-san ${control_plane_eip_public_ip} --write-kubeconfig-mode 644" sh -
 
 until test -f /var/lib/rancher/k3s/server/node-token; do
   sleep 5

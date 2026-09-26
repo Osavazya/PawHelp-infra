@@ -9,6 +9,9 @@ Production-style infrastructure for PawHelp with separate provisioning and deliv
 - [Secret paths](docs/secret-paths.md)
 - [Local endpoints](docs/local-endpoints.md)
 - [Secrets checklist](docs/secrets.md)
+- [Production readiness](docs/production-readiness.md)
+- [CI/CD flow](docs/cicd.md)
+- [Networking](docs/networking.md)
 
 ## Runtime services
 
@@ -21,13 +24,16 @@ teamcity                         TeamCity server and build agent
 ## What is included
 
 - Terraform bootstrap for encrypted S3 remote state.
-- Terraform AWS stack with VPC, public subnets, internet routing, security groups, IAM, artifact S3 bucket, EC2 launch templates, and ASGs.
+- Terraform AWS stack with VPC, public subnets, internet routing, security groups, IAM, Elastic IP, artifact S3 bucket, EC2 launch templates, and ASGs.
 - One Kubernetes cluster per environment: 1 control-plane node and 2 worker nodes.
 - k3s bootstrap through EC2 user data, with cluster join data stored in SSM Parameter Store.
 - Argo CD app-of-apps for application delivery.
 - Helm umbrella chart for PawHelp backend, frontend, PostgreSQL, and LibreTranslate.
 - Helm charts for Prometheus, Grafana, Loki, Promtail, alerting rules, and dashboards.
 - Helm chart for TeamCity server and agent.
+- Helm chart for CRM manager workspace.
+- Resource requests, limits, PDB, HPA, and NetworkPolicy for application workloads.
+- TeamCity pipeline-as-code for test, image build, image push, Argo CD sync, and regression checks.
 - Optional Ansible k3s playbook for manual bootstrap or interview demo.
 
 ## AWS cost model
