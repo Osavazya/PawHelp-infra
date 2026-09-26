@@ -18,6 +18,7 @@ key_name          = null
 
 git_repo_url        = "https://github.com/Osavazya/PawHelp-infra.git"
 git_target_revision = "master"
+enable_argocd       = true
 
 
 # Low-cost backup guardrail. Snapshot storage still has AWS cost.

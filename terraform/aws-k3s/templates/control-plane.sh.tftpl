@@ -70,6 +70,7 @@ done
 
 curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
+%{ if enable_argocd ~}
 /usr/local/bin/kubectl create namespace argocd --dry-run=client -o yaml | /usr/local/bin/kubectl apply -f -
 /usr/local/bin/kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
@@ -146,4 +147,5 @@ until /usr/local/bin/kubectl -n argocd get deployment argocd-server >/dev/null 2
 done
 
 /usr/local/bin/kubectl apply -f /tmp/pawhelp-root.yaml
+%{ endif ~}
 %{ endif ~}

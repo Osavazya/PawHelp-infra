@@ -387,6 +387,7 @@ resource "aws_launch_template" "control_plane" {
     control_plane_eip_public_ip      = aws_eip.control_plane.public_ip
     git_repo_url                     = var.git_repo_url
     git_target_revision              = var.git_target_revision
+    enable_argocd                    = var.enable_argocd
     enable_wireguard                 = var.enable_wireguard
     wireguard_port                   = var.wireguard_port
     wireguard_address                = var.wireguard_address
@@ -416,7 +417,7 @@ resource "aws_launch_template" "control_plane" {
 }
 
 resource "aws_launch_template" "worker" {
-  for_each      = local.worker_pools
+  for_each      = { for name, pool in local.worker_pools : name => pool if pool.desired_capacity > 0 }
   name_prefix   = "${local.name}-${each.key}-"
   image_id      = data.aws_ami.amazon_linux_2023.id
   instance_type = var.instance_type
@@ -503,7 +504,7 @@ resource "aws_autoscaling_group" "control_plane" {
 }
 
 resource "aws_autoscaling_group" "worker" {
-  for_each            = local.worker_pools
+  for_each            = { for name, pool in local.worker_pools : name => pool if pool.desired_capacity > 0 }
   name                = "${local.name}-${each.key}-worker"
   min_size            = each.value.desired_capacity
   max_size            = each.value.desired_capacity

@@ -1,3 +1,33 @@
+cert-manager:
+  nodeSelector:
+    pawhelp.io/node-pool: backend
+  tolerations: []
+  webhook:
+    nodeSelector:
+      pawhelp.io/node-pool: backend
+    tolerations: []
+  cainjector:
+    nodeSelector:
+      pawhelp.io/node-pool: backend
+    tolerations: []
+  startupapicheck:
+    nodeSelector:
+      pawhelp.io/node-pool: backend
+    tolerations: []
+
+external-secrets:
+  nodeSelector:
+    pawhelp.io/node-pool: backend
+  tolerations: []
+  webhook:
+    nodeSelector:
+      pawhelp.io/node-pool: backend
+    tolerations: []
+  certController:
+    nodeSelector:
+      pawhelp.io/node-pool: backend
+    tolerations: []
+
 clusterSecretStore:
   region: eu-central-1
 

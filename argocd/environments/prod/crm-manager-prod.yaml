@@ -15,7 +15,7 @@ spec:
       valueFiles:
         - values-prod.yaml
   destination:
-    server: https://kubernetes.default.svc
+    name: pawhelp-prod
     namespace: crm-prod
   syncPolicy:
     automated:

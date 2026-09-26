@@ -10,7 +10,7 @@ root_volume_size                 = 30
 control_plane_desired_capacity   = 1
 frontend_worker_desired_capacity = 1
 backend_worker_desired_capacity  = 1
-infra_worker_desired_capacity    = 1
+infra_worker_desired_capacity    = 0
 
 admin_cidr_blocks = []
 enable_ssh        = false
@@ -18,6 +18,7 @@ key_name          = null
 
 git_repo_url        = "https://github.com/Osavazya/PawHelp-infra.git"
 git_target_revision = "prod"
+enable_argocd       = false
 
 
 # Low-cost backup guardrail. Snapshot storage still has AWS cost.

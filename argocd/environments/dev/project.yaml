@@ -4,7 +4,7 @@ metadata:
   name: pawhelp
   namespace: argocd
 spec:
-  description: PawHelp dev applications and platform services
+  description: PawHelp dev applications plus prod runtime delivery from the shared dev Argo CD
   sourceRepos:
     - https://github.com/Osavazya/PawHelp-infra.git
     - https://prometheus-community.github.io/helm-charts
@@ -12,6 +12,8 @@ spec:
     - https://charts.jetstack.io
     - https://charts.external-secrets.io
   destinations:
+    - namespace: argocd
+      server: https://kubernetes.default.svc
     - namespace: platform-system
       server: https://kubernetes.default.svc
     - namespace: pawhelp-dev
@@ -22,6 +24,12 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: teamcity
       server: https://kubernetes.default.svc
+    - namespace: platform-system
+      name: pawhelp-prod
+    - namespace: pawhelp-prod
+      name: pawhelp-prod
+    - namespace: crm-prod
+      name: pawhelp-prod
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"

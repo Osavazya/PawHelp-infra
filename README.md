@@ -2,7 +2,6 @@
 
 Production-style infrastructure for PawHelp with separate provisioning and delivery layers.
 
-
 ## Platform documentation
 
 - [Deployment flow](docs/deployment-flow.md)
@@ -20,16 +19,18 @@ Production-style infrastructure for PawHelp with separate provisioning and deliv
 ```text
 pawhelp-dev / pawhelp-prod       Backend, frontend, PostgreSQL, LibreTranslate
 crm-dev / crm-prod               CRM manager workspace and Excel import storage
-monitoring-dev / monitoring-prod Prometheus, Grafana, Loki, Promtail
-teamcity                         TeamCity server and build agent (dev only)
+monitoring-dev                   Prometheus, Grafana, Loki, Promtail
+teamcity                         TeamCity server and build agent
 ```
+
 ## What is included
 
 - Terraform bootstrap for encrypted S3 remote state.
 - Terraform AWS stack with VPC, public subnets, internet routing, security groups, IAM, Elastic IP, artifact S3 bucket, PostgreSQL backup S3 bucket, ECR repositories, EC2 launch templates, and ASGs.
-- One Kubernetes cluster per environment: 1 tainted control-plane node and 3 worker node pools: frontend, backend, and infra.
+- Dev Kubernetes cluster: 1 tainted control-plane node and 3 worker node pools: frontend, backend, and infra.
+- Prod Kubernetes cluster: 1 tainted control-plane node and 2 worker node pools: frontend and backend.
 - k3s bootstrap through EC2 user data, with cluster join data stored in SSM Parameter Store.
-- Argo CD app-of-apps for application delivery.
+- Shared Argo CD app-of-apps in dev for dev and prod delivery.
 - Helm umbrella chart for PawHelp backend, frontend, PostgreSQL, and LibreTranslate.
 - Helm charts for cert-manager, External Secrets Operator, Prometheus, Grafana, Loki, Promtail, alerting rules, and dashboards.
 - Helm chart for TeamCity server and agent, deployed only from the dev Argo root.
@@ -45,14 +46,14 @@ teamcity                         TeamCity server and build agent (dev only)
 control-plane  k3s API and bootstrap only, tainted NoSchedule
 frontend       frontend web workload
 backend        API, PostgreSQL, LibreTranslate, backup CronJobs
-infra          Argo CD, cert-manager, External Secrets, monitoring, TeamCity
+infra          dev only: Argo CD, cert-manager, External Secrets, monitoring, TeamCity
 ```
 
-TeamCity is included only in the dev Argo root. Prod does not deploy TeamCity.
+Prod does not deploy TeamCity, Argo CD, Grafana, or a dedicated infra worker. Prod cluster add-ons run on the backend worker pool.
 
 ## AWS cost model
 
-The default topology intentionally avoids EKS, NAT Gateway, external database services, and managed load balancers. The stack still creates 3 EC2 instances per environment because the target is a DevOps portfolio-grade Kubernetes layout. Apply it, verify, and destroy it when done.
+The default topology intentionally avoids EKS, NAT Gateway, external database services, and managed load balancers. Dev creates 4 EC2 instances, prod creates 3 EC2 instances. Apply it, verify, and destroy it when done.
 
 ## Directory layout
 
@@ -104,7 +105,7 @@ terraform init -reconfigure -backend-config=backend-prod.hcl
 terraform apply -var-file=env/prod.tfvars
 ```
 
-Set `git_repo_url` in the tfvars file before apply if Argo CD should bootstrap itself from this repository.
+Dev has `enable_argocd = true`. Prod has `enable_argocd = false`; prod deployments are managed by the dev Argo CD after the prod cluster is registered as `pawhelp-prod`.
 
 ## Destroy
 
@@ -130,4 +131,4 @@ helm lint . -f values-dev.yaml
 
 ## Argo CD
 
-Replace `https://github.com/Osavazya/PawHelp-infra.git` in `argocd/applications/*.yaml` with the real repo URL.
+Register prod in the dev Argo CD as `pawhelp-prod`, then sync `pawhelp-prod-root`. TeamCity changes image tags in Git; Argo CD applies those changes to the target cluster.

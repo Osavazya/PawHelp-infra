@@ -1,27 +1,25 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: monitoring-prod
+  name: pawhelp-prod-root
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "15"
+    argocd.argoproj.io/sync-wave: "50"
 spec:
   project: pawhelp
   source:
     repoURL: https://github.com/Osavazya/PawHelp-infra.git
     targetRevision: prod
-    path: helm/monitoring
-    helm:
-      valueFiles:
-        - values-prod.yaml
+    path: argocd/environments/prod
+    directory:
+      recurse: false
+      include: '*.yaml'
   destination:
     server: https://kubernetes.default.svc
-    namespace: monitoring-prod
+    namespace: argocd
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
-

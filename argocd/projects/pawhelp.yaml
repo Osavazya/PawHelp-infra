@@ -9,25 +9,28 @@ spec:
     - https://github.com/Osavazya/PawHelp-infra.git
     - https://prometheus-community.github.io/helm-charts
     - https://grafana.github.io/helm-charts
+    - https://charts.jetstack.io
+    - https://charts.external-secrets.io
   destinations:
-    - namespace: pawhelp-dev
+    - namespace: platform-system
       server: https://kubernetes.default.svc
-    - namespace: pawhelp-prod
+    - namespace: pawhelp-dev
       server: https://kubernetes.default.svc
     - namespace: monitoring-dev
       server: https://kubernetes.default.svc
     - namespace: crm-dev
       server: https://kubernetes.default.svc
-    - namespace: monitoring-prod
-      server: https://kubernetes.default.svc
-    - namespace: crm-prod
-      server: https://kubernetes.default.svc
     - namespace: teamcity
       server: https://kubernetes.default.svc
+    - namespace: platform-system
+      name: pawhelp-prod
+    - namespace: pawhelp-prod
+      name: pawhelp-prod
+    - namespace: crm-prod
+      name: pawhelp-prod
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"
   namespaceResourceWhitelist:
     - group: "*"
       kind: "*"
-

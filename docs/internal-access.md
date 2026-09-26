@@ -17,17 +17,15 @@ https://api.pawhelp.localhost
 https://argocd.dev.pawhelp.internal
 https://grafana.dev.pawhelp.internal
 https://teamcity.pawhelp.internal
-
-https://argocd.prod.pawhelp.internal
-https://grafana.prod.pawhelp.internal
 ```
 
-These ingresses use Traefik `ipAllowList` middleware. Requests are allowed only from the VPN CIDR:
+These ingresses use Traefik `ipAllowList` middleware. Requests are allowed only from the dev VPN CIDR:
 
 ```text
-dev:  10.44.0.0/24
-prod: 10.45.0.0/24
+dev: 10.44.0.0/24
 ```
+
+Prod has no internal UI stack. WireGuard can still be enabled on the prod control-plane for admin access to the node and Kubernetes API path, but application delivery is controlled from dev Argo CD.
 
 ## WireGuard bootstrap
 
@@ -89,11 +87,10 @@ AllowedIPs = 10.44.0.1/32
 PersistentKeepalive = 25
 ```
 
-Add local host records after connecting to VPN:
+Add local host records after connecting to the dev VPN:
 
 ```text
 10.44.0.1 argocd.dev.pawhelp.internal grafana.dev.pawhelp.internal teamcity.pawhelp.internal
-10.45.0.1 argocd.prod.pawhelp.internal grafana.prod.pawhelp.internal
 ```
 
 This keeps Argo CD, Grafana, and TeamCity off the public internet while avoiding paid AWS Client VPN for the portfolio environment.
@@ -110,10 +107,10 @@ pawhelp.io/node-pool=backend
 pawhelp.io/node-pool=infra
 ```
 
-The infra pool is tainted:
+The infra pool exists only in dev and is tainted:
 
 ```text
 pawhelp.io/node-pool=infra:NoSchedule
 ```
 
-Argo CD, Grafana, cert-manager, External Secrets, and TeamCity tolerate that taint and use `nodeSelector` for the infra pool. TeamCity is present only in the dev Argo root.
+Dev infrastructure workloads tolerate that taint and use `nodeSelector` for the infra pool. Prod does not create an infra pool; prod platform add-ons run on the backend worker pool.

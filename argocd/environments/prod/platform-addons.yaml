@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: platform-addons
+  name: platform-addons-prod
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "0"
@@ -14,8 +14,9 @@ spec:
     helm:
       valueFiles:
         - values.yaml
+        - values-prod.yaml
   destination:
-    server: https://kubernetes.default.svc
+    name: pawhelp-prod
     namespace: platform-system
   syncPolicy:
     automated:

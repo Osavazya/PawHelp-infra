@@ -21,14 +21,14 @@ TeamCity: https://teamcity.pawhelp.internal
 Frontend: https://pawhelp.localhost
 Backend API: https://api.pawhelp.localhost
 CRM manager: https://crm.pawhelp.localhost
-Argo CD: https://argocd.prod.pawhelp.internal
-Grafana: https://grafana.prod.pawhelp.internal
 ```
+
+Prod does not host Argo CD, Grafana, or TeamCity. Dev Argo CD deploys prod workloads after the prod cluster is registered as `pawhelp-prod`.
 
 ## Access model
 
 - Terraform creates AWS infrastructure and k3s nodes.
-- Argo CD syncs Helm charts into Kubernetes.
+- Argo CD in dev syncs Helm charts into dev and prod Kubernetes clusters.
 - Public application ingress is handled by the default k3s Traefik controller.
 - Internal platform ingress is protected by Traefik `ipAllowList` and WireGuard VPN CIDRs.
 - TeamCity is deployed only by the dev Argo root and is used as shared CI/CD.

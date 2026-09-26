@@ -40,17 +40,15 @@ teamcity
 argocd
 ```
 
+Prometheus, Grafana, Loki, TeamCity, and Argo CD are deployed only in dev.
+
 External access is only through k3s Traefik ingress and the node security group.
 
 ## Admin-only services
 
-Argo CD is installed inside the cluster and is not exposed by default. Use port-forward or SSM session for administration:
+Argo CD is installed in dev and exposed only through the internal VPN allowlist. TeamCity and Grafana follow the same model.
 
-```powershell
-kubectl -n argocd port-forward svc/argocd-server 8080:443
-```
-
-TeamCity has an ingress host for demo access, but the service still lives in Kubernetes and can be restricted by DNS/security group rules in a real deployment.
+Prod does not host Argo CD or TeamCity. Register the prod cluster in dev Argo CD as `pawhelp-prod` and deploy prod from there.
 
 ## Production upgrade path
 
@@ -64,6 +62,7 @@ For a real always-on production cluster, replace the demo network with:
 - ACM certificates;
 - in-cluster PostgreSQL with tested backups and restore runbooks;
 - S3 for backend uploads.
+
 ## Internal platform access
 
 Application ingress can stay public. Platform UIs are internal-only:
@@ -75,6 +74,7 @@ TeamCity
 ```
 
 Terraform installs WireGuard on the control-plane node and opens only the WireGuard UDP port. Traefik middleware allows platform ingress traffic only from the VPN CIDR. See `docs/internal-access.md`.
+
 ## Worker node pools
 
-Terraform creates separate worker ASGs for frontend, backend, and infra. Workloads are pinned with Kubernetes `nodeSelector`; infra workloads also tolerate the infra taint. This keeps application workloads away from the control-plane and separates CI/observability/platform components from frontend/backend workloads.
+Dev creates separate worker ASGs for frontend, backend, and infra. Prod creates frontend and backend worker ASGs only. Workloads are pinned with Kubernetes `nodeSelector`; dev infra workloads also tolerate the infra taint. This keeps application workloads away from the control-plane and avoids running CI/CD or observability infrastructure inside prod.

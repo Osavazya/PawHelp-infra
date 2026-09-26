@@ -55,7 +55,7 @@ variable "backend_worker_desired_capacity" {
 
 variable "infra_worker_desired_capacity" {
   type        = number
-  description = "Number of infrastructure worker nodes for Argo CD, monitoring, and CI/CD."
+  description = "Number of infrastructure worker nodes for Argo CD, monitoring, and CI/CD. Set to 0 for runtime-only environments."
   default     = 1
 }
 
@@ -87,6 +87,11 @@ variable "git_target_revision" {
   type        = string
   description = "Git revision used by Argo CD."
   default     = "main"
+}
+variable "enable_argocd" {
+  type        = bool
+  description = "Install Argo CD and bootstrap the local app-of-apps root on this cluster."
+  default     = true
 }
 
 variable "artifact_bucket_force_destroy" {
