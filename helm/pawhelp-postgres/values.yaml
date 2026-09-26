@@ -1,0 +1,21 @@
+image:
+  repository: postgres
+  tag: "16"
+  pullPolicy: IfNotPresent
+
+auth:
+  database: pawhelp
+  username: pawhelp
+  password: pawhelp_password
+
+persistence:
+  size: 8Gi
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+

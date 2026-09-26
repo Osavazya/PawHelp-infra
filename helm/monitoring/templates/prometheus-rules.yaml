@@ -1,0 +1,39 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: pawhelp-rules
+  labels:
+    release: monitoring
+spec:
+  groups:
+    - name: pawhelp.api
+      rules:
+        - alert: PawHelpBackendDown
+          expr: absent(up{job=~".*pawhelp.*backend.*"} == 1)
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: PawHelp backend target is missing
+            description: Prometheus has not seen a healthy PawHelp backend target for 5 minutes.
+        - alert: PawHelpPodCrashLooping
+          expr: increase(kube_pod_container_status_restarts_total{namespace=~"pawhelp-.*"}[10m]) > 3
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: PawHelp pod is restarting repeatedly
+            description: A PawHelp container restarted more than 3 times in 10 minutes.
+        - alert: PawHelpHighMemoryUsage
+          expr: |
+            sum(container_memory_working_set_bytes{namespace=~"pawhelp-.*", container!="", image!=""}) by (pod)
+            /
+            sum(kube_pod_container_resource_limits{namespace=~"pawhelp-.*", resource="memory"}) by (pod)
+            > 0.85
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: PawHelp pod memory usage is high
+            description: A PawHelp pod is using more than 85 percent of its memory limit.
+

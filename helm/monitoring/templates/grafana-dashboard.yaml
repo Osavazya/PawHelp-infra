@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pawhelp-dashboard
+  labels:
+    grafana_dashboard: "1"
+data:
+  pawhelp-overview.json: |
+    {
+      "title": "PawHelp Overview",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "30s",
+      "panels": [
+        {
+          "type": "stat",
+          "title": "PawHelp Pods",
+          "targets": [
+            {
+              "expr": "count(kube_pod_info{namespace=~\"pawhelp-.*\"})"
+            }
+          ],
+          "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 }
+        },
+        {
+          "type": "timeseries",
+          "title": "Container Restarts",
+          "targets": [
+            {
+              "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=~\"pawhelp-.*\"}[5m])) by (pod)"
+            }
+          ],
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 }
+        },
+        {
+          "type": "logs",
+          "title": "PawHelp Logs",
+          "targets": [
+            {
+              "expr": "{namespace=~\"pawhelp-.*\"}"
+            }
+          ],
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 14 }
+        }
+      ]
+    }
+

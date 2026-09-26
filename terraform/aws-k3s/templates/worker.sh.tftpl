@@ -1,0 +1,29 @@
+#!/bin/bash
+set -euo pipefail
+
+exec > >(tee /var/log/pawhelp-worker.log | logger -t pawhelp-worker -s 2>/dev/console) 2>&1
+
+dnf update -y
+dnf install -y awscli jq tar gzip
+
+SERVER_URL=""
+K3S_TOKEN=""
+
+for attempt in $(seq 1 120); do
+  SERVER_URL="$(aws ssm get-parameter --region ${aws_region} --name "${ssm_prefix}/server_url" --query Parameter.Value --output text 2>/dev/null || true)"
+  K3S_TOKEN="$(aws ssm get-parameter --region ${aws_region} --name "${ssm_prefix}/token" --with-decryption --query Parameter.Value --output text 2>/dev/null || true)"
+
+  if [ -n "$SERVER_URL" ] && [ "$SERVER_URL" != "None" ] && [ -n "$K3S_TOKEN" ] && [ "$K3S_TOKEN" != "None" ]; then
+    break
+  fi
+
+  sleep 10
+done
+
+if [ -z "$SERVER_URL" ] || [ -z "$K3S_TOKEN" ] || [ "$SERVER_URL" = "None" ] || [ "$K3S_TOKEN" = "None" ]; then
+  echo "K3S join data not found in SSM"
+  exit 1
+fi
+
+curl -sfL https://get.k3s.io | K3S_URL="$SERVER_URL" K3S_TOKEN="$K3S_TOKEN" INSTALL_K3S_EXEC="agent --node-name worker-$(hostname) --node-label pawhelp.io/environment=${environment} --node-label node-role.kubernetes.io/worker=true" sh -
+

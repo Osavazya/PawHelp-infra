@@ -1,0 +1,46 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/osavazya/pawhelp-backend
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8000
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+
+ingress:
+  enabled: false
+  className: traefik
+  host: api.pawhelp.local
+  tls:
+    enabled: false
+    secretName: ""
+
+env:
+  APP_NAME: PawHelp API
+  DEFAULT_LOCALE: es
+  SUPPORTED_LOCALES: es,en,uk
+  AUTO_CREATE_TABLES: "false"
+  TRANSLATOR_PROVIDER: libretranslate
+  LIBRETRANSLATE_URL: http://pawhelp-libretranslate:5000
+
+secretEnv:
+  SECRET_KEY: change-me
+  DATABASE_URL: postgresql://pawhelp:pawhelp_password@pawhelp-postgres:5432/pawhelp
+  GOOGLE_MAPS_API_KEY: ""
+
+uploads:
+  size: 5Gi
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

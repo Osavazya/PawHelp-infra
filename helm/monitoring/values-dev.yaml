@@ -1,0 +1,56 @@
+kube-prometheus-stack:
+  fullnameOverride: monitoring
+  grafana:
+    enabled: true
+    adminPassword: admin
+    service:
+      type: ClusterIP
+    sidecar:
+      dashboards:
+        enabled: true
+        label: grafana_dashboard
+      datasources:
+        enabled: true
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      hosts:
+        - grafana.dev.pawhelp.local
+  prometheus:
+    prometheusSpec:
+      retention: 7d
+      scrapeInterval: 30s
+      serviceMonitorSelectorNilUsesHelmValues: false
+      ruleSelectorNilUsesHelmValues: false
+      podMonitorSelectorNilUsesHelmValues: false
+      resources:
+        requests:
+          cpu: 150m
+          memory: 512Mi
+        limits:
+          cpu: 1000m
+          memory: 1536Mi
+  alertmanager:
+    enabled: true
+
+loki:
+  deploymentMode: SingleBinary
+  loki:
+    auth_enabled: false
+    commonConfig:
+      replication_factor: 1
+    storage:
+      type: filesystem
+  singleBinary:
+    replicas: 1
+  read:
+    replicas: 0
+  write:
+    replicas: 0
+  backend:
+    replicas: 0
+
+promtail:
+  config:
+    clients:
+      - url: http://monitoring-dev-loki:3100/loki/api/v1/push

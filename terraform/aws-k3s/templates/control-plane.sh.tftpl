@@ -1,0 +1,67 @@
+#!/bin/bash
+set -euo pipefail
+
+exec > >(tee /var/log/pawhelp-control-plane.log | logger -t pawhelp-control-plane -s 2>/dev/console) 2>&1
+
+dnf update -y
+dnf install -y awscli git jq tar gzip
+
+TOKEN="$(curl -X PUT -H 'X-aws-ec2-metadata-token-ttl-seconds: 21600' -s http://169.254.169.254/latest/api/token)"
+PRIVATE_IP="$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/local-ipv4)"
+
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --node-name control-plane-$(hostname) --node-label pawhelp.io/environment=${environment} --node-label node-role.kubernetes.io/control-plane=true --tls-san $PRIVATE_IP --write-kubeconfig-mode 644" sh -
+
+until test -f /var/lib/rancher/k3s/server/node-token; do
+  sleep 5
+done
+
+K3S_TOKEN="$(cat /var/lib/rancher/k3s/server/node-token)"
+
+aws ssm put-parameter --region ${aws_region} --name "${ssm_prefix}/server_url" --type String --value "https://$PRIVATE_IP:6443" --overwrite
+aws ssm put-parameter --region ${aws_region} --name "${ssm_prefix}/token" --type SecureString --value "$K3S_TOKEN" --overwrite
+
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+
+until /usr/local/bin/kubectl get nodes >/dev/null 2>&1; do
+  sleep 5
+done
+
+curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+/usr/local/bin/kubectl create namespace argocd --dry-run=client -o yaml | /usr/local/bin/kubectl apply -f -
+/usr/local/bin/kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+%{ if git_repo_url != "" ~}
+cat >/tmp/pawhelp-root.yaml <<'EOF'
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pawhelp-root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ${git_repo_url}
+    targetRevision: ${git_target_revision}
+    path: infra/argocd
+    directory:
+      recurse: true
+      include: '{projects/*.yaml,applications/*.yaml}'
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+EOF
+
+until /usr/local/bin/kubectl -n argocd get deployment argocd-server >/dev/null 2>&1; do
+  sleep 5
+done
+
+/usr/local/bin/kubectl apply -f /tmp/pawhelp-root.yaml
+%{ endif ~}
+

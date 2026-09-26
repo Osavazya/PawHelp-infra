@@ -1,0 +1,47 @@
+global:
+  environment: dev
+  host: dev.pawhelp.local
+  imagePullPolicy: IfNotPresent
+
+pawhelp-postgres:
+  auth:
+    database: pawhelp
+    username: pawhelp
+    password: pawhelp_password
+  persistence:
+    size: 8Gi
+
+libretranslate:
+  enabled: true
+  languages: en,es,uk
+
+pawhelp-backend:
+  replicaCount: 1
+  image:
+    repository: ghcr.io/osavazya/pawhelp-backend
+    tag: dev
+  env:
+    APP_NAME: PawHelp API
+    DEFAULT_LOCALE: es
+    SUPPORTED_LOCALES: es,en,uk
+    AUTO_CREATE_TABLES: "true"
+    TRANSLATOR_PROVIDER: libretranslate
+    LIBRETRANSLATE_URL: http://pawhelp-libretranslate:5000
+    CORS_ORIGINS: '["*"]'
+  secretEnv:
+    SECRET_KEY: change-me-dev
+    DATABASE_URL: postgresql://pawhelp:pawhelp_password@pawhelp-postgres:5432/pawhelp
+    GOOGLE_MAPS_API_KEY: ""
+  ingress:
+    enabled: true
+    host: api.dev.pawhelp.local
+
+pawhelp-frontend:
+  replicaCount: 1
+  image:
+    repository: ghcr.io/osavazya/pawhelp-frontend
+    tag: dev
+  ingress:
+    enabled: true
+    host: dev.pawhelp.local
+

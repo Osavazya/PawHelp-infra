@@ -1,0 +1,20 @@
+apiVersion: v2
+name: pawhelp
+description: PawHelp umbrella chart
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+dependencies:
+  - name: pawhelp-backend
+    version: 0.1.0
+    repository: file://../pawhelp-backend
+  - name: pawhelp-frontend
+    version: 0.1.0
+    repository: file://../pawhelp-frontend
+  - name: pawhelp-postgres
+    version: 0.1.0
+    repository: file://../pawhelp-postgres
+  - name: libretranslate
+    version: 0.1.0
+    repository: file://../libretranslate
+

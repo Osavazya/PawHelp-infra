@@ -1,0 +1,7 @@
+apiVersion: v2
+name: pawhelp-teamcity
+description: TeamCity server and build agent
+type: application
+version: 0.1.0
+appVersion: "2025.07"
+

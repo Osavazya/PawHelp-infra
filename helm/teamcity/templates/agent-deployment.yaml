@@ -1,0 +1,28 @@
+{{- if .Values.agent.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-teamcity-agent
+spec:
+  replicas: {{ .Values.agent.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: teamcity-agent
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: teamcity-agent
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: agent
+          image: "{{ .Values.agent.image.repository }}:{{ .Values.agent.image.tag }}"
+          imagePullPolicy: {{ .Values.agent.image.pullPolicy }}
+          env:
+            - name: SERVER_URL
+              value: http://{{ .Release.Name }}-teamcity-server:{{ .Values.server.service.port }}
+          resources:
+            {{- toYaml .Values.agent.resources | nindent 12 }}
+{{- end }}
+

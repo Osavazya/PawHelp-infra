@@ -1,0 +1,44 @@
+- name: Prepare nodes
+  hosts: all
+  become: true
+  tasks:
+    - name: Install base packages
+      ansible.builtin.dnf:
+        name:
+          - curl
+          - tar
+          - gzip
+        state: present
+
+- name: Install k3s control plane
+  hosts: control_plane
+  become: true
+  tasks:
+    - name: Install k3s server
+      ansible.builtin.shell: |
+        curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --write-kubeconfig-mode 644" sh -
+      args:
+        creates: /etc/systemd/system/k3s.service
+
+    - name: Read node token
+      ansible.builtin.slurp:
+        src: /var/lib/rancher/k3s/server/node-token
+      register: node_token
+
+    - name: Store join data
+      ansible.builtin.set_fact:
+        k3s_token: "{{ node_token.content | b64decode | trim }}"
+        k3s_url: "https://{{ ansible_default_ipv4.address }}:6443"
+
+- name: Install k3s workers
+  hosts: workers
+  become: true
+  vars:
+    master_host: "{{ groups['control_plane'][0] }}"
+  tasks:
+    - name: Install k3s agent
+      ansible.builtin.shell: |
+        curl -sfL https://get.k3s.io | K3S_URL="{{ hostvars[master_host].k3s_url }}" K3S_TOKEN="{{ hostvars[master_host].k3s_token }}" sh -
+      args:
+        creates: /etc/systemd/system/k3s-agent.service
+

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-teamcity-server
+spec:
+  selector:
+    app.kubernetes.io/name: teamcity-server
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - name: http
+      port: {{ .Values.server.service.port }}
+      targetPort: http
+

@@ -1,0 +1,5 @@
+global:
+  environment: local
+  host: pawhelp.local
+  imagePullPolicy: IfNotPresent
+

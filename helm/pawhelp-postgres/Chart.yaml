@@ -1,0 +1,7 @@
+apiVersion: v2
+name: pawhelp-postgres
+description: PawHelp PostgreSQL
+type: application
+version: 0.1.0
+appVersion: "16"
+
